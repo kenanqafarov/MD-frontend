@@ -1,0 +1,158 @@
+.editAppointmentTypeFormWrapper{
+    height: 100vh;
+}
+
+.editAppointmentTypeFormContainer {
+  background: #fff;
+  border-radius: 10px;
+  padding: 32px 32px 24px 32px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
+  margin: 0 auto;
+  position: relative;
+  width: 100%;
+}
+
+.editAppointmentTypeFormRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.editAppointmentTypeLabel {
+  width: 160px;
+  color: #222;
+  font-weight: 500;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.editAppointmentTypeField {
+  width: 800px;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f7fafd;
+  font-size: 15px;
+  color: #222;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.required {
+  color: #ef4444;
+  margin-left: 2px;
+  font-size: 16px;
+}
+
+.editAppointmentTypeInputFieldWithIcon {
+  position: relative;
+  width: 800px;
+}
+
+.editAppointmentTypeInputFieldWithIcon .editAppointmentTypeField {
+  width: 100%;
+  padding-right: 40px; /* İkon üçün yer ayırın */
+}
+
+.editAppointmentTypeInputIcon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+}
+
+.editAppointmentTypeActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+  justify-content: flex-end;
+}
+
+.editAppointmentTypeSaveBtn {
+  background: #155eef;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 28px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.editAppointmentTypeSaveBtn:hover {
+  background: #0d4bc4;
+}
+.editAppointmentTypeSaveBtn:disabled {
+  background: #93b3f5;
+  cursor: not-allowed;
+}
+.editAppointmentTypeCancelBtn {
+  background: white;
+  color: #155eef;
+  border: 1px solid #155eef;
+  border-radius: 8px;
+  padding: 10px 28px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.editAppointmentTypeCancelBtn:hover {
+  background: #f0f4ff;
+}
+.editAppointmentTypeCancelBtn:disabled {
+  color: #93b3f5;
+  border-color: #93b3f5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .editAppointmentTypeFormContainer {
+    padding: 12px 4px;
+    max-width: 100vw;
+  }
+  .editAppointmentTypeLabel {
+    width: 100px;
+    font-size: 13px;
+  }
+  .editAppointmentTypeField {
+    font-size: 13px;
+    padding: 8px 8px;
+  }
+  .editAppointmentTypeSaveBtn,
+  .editAppointmentTypeCancelBtn {
+    width: 100%;
+    padding: 10px 0;
+  }
+  .editAppointmentTypeActions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .editAppointmentTypeFormRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .editAppointmentTypeInputFieldWithIcon {
+    width: 100%;
+  }
+}

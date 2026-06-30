@@ -1,0 +1,214 @@
+.recommendationsPageWrapper{
+    height: 100vh;
+
+}
+
+.recommendationsPageContainer {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
+    margin: 32px auto;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.recommendationsPageTopPart {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 40px;
+}
+
+.leftPartOfTop {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.recommendationsStatusSelect {
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f7fafd;
+    font-size: 15px;
+    color: #222;
+    outline: none;
+    cursor: pointer;
+}
+
+.searchBarContainer {
+    position: relative;
+}
+
+.searchBarContainer input {
+    padding: 8px 12px 8px 36px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f7fafd;
+    font-size: 15px;
+    color: #222;
+    outline: none;
+    width: 250px;
+}
+
+.searchIconBTN {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 20px;
+}
+
+.rightPartOfTop {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.addNewRecommendationItem {
+    background: #fff;
+    color: #155EEF;
+    border: 1px solid #155EEF !important;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.addNewRecommendationItem:hover {
+    background: #155EEF;
+    color: #fff;
+}
+
+.exportDataOfRecommendations {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    color: #155eef;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.exportDataOfRecommendations:hover {
+    background: #f0f4ff;
+}
+
+.recommendationsTableWrapper {
+    overflow-x: auto;
+    border: 1px solid #e5e7eb;
+}
+
+.recommendationsTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.recommendationsTable th,
+.recommendationsTable td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.recommendationsTable th {
+    background: #f7fafd;
+    color: #667085;
+    font-weight: 500;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.recommendationsTable th span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.recommendationsTable tbody tr:hover {
+    background: #f0f4ff;
+}
+
+.tableArrowIcon {
+    font-size: 16px;
+}
+
+.status {
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.status.active {
+    background: #40BC2B; /* Light blue/green */
+    color: #fff; /* Darker blue/green */
+}
+
+.status.passive {
+    background:#FD4A3D; /* Light red */
+    color: #fff; /* Darker red */
+}
+
+
+.icons {
+    display: flex;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.icons .edit {
+    color: #155eef;
+    font-size: 18px;
+}
+
+.icons .delete {
+    color: #ef4444;
+    font-size: 18px;
+}
+
+@media (max-width: 768px) {
+    .recommendationsPageTopPart {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .rightPartOfTop {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .searchBarContainer input {
+        width: 100%;
+    }
+
+    .recommendationsPageContainer {
+        padding: 16px;
+    }
+
+    .recommendationsTable th,
+    .recommendationsTable td {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    .addNewRecommendationItem,
+    .exportDataOfRecommendations {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+} 

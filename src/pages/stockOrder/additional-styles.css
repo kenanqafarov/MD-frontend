@@ -1,0 +1,128 @@
+/* Əlavə CSS stillər avtomatik funksiyalar üçün */
+
+.stockOrderFormWrapper__checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+  
+  .stockOrderFormWrapper__checkbox {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .stockOrderFormWrapper__autoButtons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .stockOrderFormWrapper__buttonAuto {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .stockOrderFormWrapper__buttonAuto:hover:not(:disabled) {
+    background: #218838;
+  }
+  
+  .stockOrderFormWrapper__buttonAuto:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .stockOrderFormWrapper__buttonClear {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .stockOrderFormWrapper__buttonClear:hover:not(:disabled) {
+    background: #c82333;
+  }
+  
+  .stockOrderFormWrapper__buttonClear:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .stockOrderFormWrapper__availableProducts {
+    margin: 16px 0;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+  }
+  
+  .stockOrderFormWrapper__availableProducts h4 {
+    margin: 0 0 12px 0;
+    color: #495057;
+    font-size: 16px;
+  }
+  
+  .stockOrderFormWrapper__productGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+  }
+  
+  .stockOrderFormWrapper__productCard {
+    background: white;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .stockOrderFormWrapper__productName {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 4px;
+  }
+  
+  .stockOrderFormWrapper__productDetails {
+    font-size: 12px;
+    color: #6c757d;
+  }
+  
+  .stockOrderFormWrapper__manualAdd {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #dee2e6;
+  }
+  
+  .stockOrderFormWrapper__manualAdd h4 {
+    margin: 0 0 12px 0;
+    color: #495057;
+    font-size: 16px;
+  }
+  
+  @media (max-width: 768px) {
+    .stockOrderFormWrapper__autoButtons {
+      flex-direction: column;
+    }
+  
+    .stockOrderFormWrapper__productGrid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  

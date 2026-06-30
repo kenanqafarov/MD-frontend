@@ -1,0 +1,284 @@
+.addAdminFormContainer {
+  background: #fff;
+  border-radius: 10px;
+  padding: 32px 32px 24px 32px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
+  margin: 0 auto;
+  position: relative;
+  width: 100%;
+}
+
+.addAdminFormRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.addAdminLabel {
+  width: 160px;
+  color: #222;
+  font-weight: 500;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.addAdminField {
+  width: 800px;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f7fafd;
+  font-size: 15px;
+  color: #222;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.required {
+  color: #ef4444;
+  margin-left: 2px;
+  font-size: 16px;
+}
+
+.addAdminPasswordBox {
+  position: relative;
+  width: 800px;
+  display: flex;
+  align-items: center;
+}
+.addAdminPasswordBox .addAdminField {
+  width: 100%;
+  padding-right: 40px;
+}
+.addAdminPasswordIcon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+}
+
+.addAdminCheckboxBlock {
+  align-items: flex-start;
+}
+.addAdminCheckboxGroup {
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 2px;
+  margin-left: 120px;
+  
+}
+
+.addAdminCheckboxBlock{
+  display: flex;
+}
+
+.addAdminCheckboxGroup label {
+  font-size: 15px;
+  font-weight: 400;
+  color: #222;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.addAdminImageUploadRow {
+  align-items: flex-start;
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+
+}
+.addAdminUploadContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 260px;
+ 
+}
+.addAdminPhotoWrapper{
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #CDD5DF;
+}
+
+.addAdminUploadButton {
+  background: #155eef;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.addAdminUploadButton:hover {
+  background: #0d4bc4;
+}
+.addAdminImagePreviewContainer {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.addAdminImagePreview {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+}
+.addAdminImagePreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.addAdminDeleteButton {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  z-index: 2;
+  padding: 0;
+}
+.addAdminDeleteButton:hover {
+  background: #c81e1e;
+}
+
+.addAdminModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.addAdminModalContent {
+  background: #fff;
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.15);
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.addAdminModalContent img {
+  max-width: 80vw;
+  max-height: 80vh;
+  border-radius: 8px;
+}
+
+.addAdminActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+  justify-content: flex-end;
+}
+.addAdminSaveBtn {
+  background: #155eef;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 28px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.addAdminSaveBtn:hover {
+  background: #0d4bc4;
+}
+.addAdminSaveBtn:disabled {
+  background: #93b3f5;
+  cursor: not-allowed;
+}
+.addAdminCancelBtn {
+  background: white;
+  color: #155eef;
+  border: 1px solid #155eef;
+  border-radius: 8px;
+  padding: 10px 28px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.addAdminCancelBtn:hover {
+  background: #f0f4ff;
+}
+.addAdminCancelBtn:disabled {
+  color: #93b3f5;
+  border-color: #93b3f5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .addAdminFormContainer {
+    padding: 12px 4px;
+    max-width: 100vw;
+  }
+  .addAdminLabel {
+    width: 100px;
+    font-size: 13px;
+  }
+  .addAdminField {
+    font-size: 13px;
+    padding: 8px 8px;
+  }
+  .addAdminSaveBtn,
+  .addAdminCancelBtn {
+    width: 100%;
+    padding: 10px 0;
+  }
+  .addAdminActions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .addAdminImagePreview {
+    width: 48px;
+    height: 48px;
+  }
+  .addAdminFormRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+}

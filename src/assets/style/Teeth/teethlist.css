@@ -1,0 +1,218 @@
+.teethList-container {
+  height: 100vh;
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+.teethList-controls-section {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.teethList-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.teethList-status-dropdown {
+  width: 128px;
+  height: 36px;
+  border: 1px solid #CDD5DF;
+  padding-left: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.teethList-date-input {
+  width: 140px;
+  height: 36px;
+  border: 1px solid #CDD5DF;
+  border-radius: 8px;
+  padding-left: 10px;
+  font-size: 14px;
+}
+
+.teethList-search-box {
+  position: relative;
+}
+
+.teethList-search-input {
+  height: 36px;
+  width: 180px;
+  border: 1px solid #CDD5DF;
+  border-radius: 8px;
+  padding-left: 10px;
+  padding-right: 40px;
+  font-size: 14px;
+  outline: none;
+}
+
+.teethList-search-button {
+  background: none;
+  border: none;
+  position: absolute;
+  right: 12px;
+  top: 9px;
+  cursor: pointer;
+  color: #666;
+  font-size: 20px;
+}
+.teethList-search-icon{
+  font-size: 20px;
+}
+
+.teethList-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.teethList-add-new-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid #155EEF;
+  border-radius: 8px;
+  font-weight: 500;
+  height: 45px;
+  width: 130px;
+  color: #155EEF;
+  text-decoration: none;
+  font-size: 14px;
+  background: #fff;
+  &:hover{
+    cursor: pointer;
+    transform: scale(0.99);
+    background-color: #0943b9;
+    color: white;
+}
+  
+}
+
+.teethList-add-new-button-export{
+    background-color: #155EEF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid #155EEF;
+    border-radius: 8px;
+    font-weight: 500;
+    height: 45px;
+    width: 130px;
+    color: #155EEF;
+    text-decoration: none;
+    font-size: 14px;
+    color: white;
+    &:hover{
+        cursor: pointer;
+        transform: scale(0.99);
+       background-color: #0943b9;
+
+    }
+}
+
+.teethList-download-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #155EEF;
+  font-size: 20px;
+}
+.teethList-download-icon{
+  font-size: 20px;
+}
+
+.teethList-table-section {
+  overflow-x: auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.teethList-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.teethList-table th,
+.teethList-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.teethList-table th:first-child,
+.teethList-table td:first-child {
+    border-right: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.teethList-table th {
+  background-color: #f3f6fb;
+  color: #374151;
+  font-weight: 600;
+  white-space: nowrap;
+  >span{
+    display: flex;
+    >.teethList-sort-icon{
+      font-size: 15px;
+    }
+  }
+}
+
+.teethList-table th .teethList-sort-icon {
+  margin-left: 5px;
+  cursor: pointer;
+  color: #888;
+  font-size: 16px;
+  vertical-align: middle;
+}
+
+.teethList-table td {
+  color: #333;
+}
+
+.teethList-link {
+  color: #155EEF;
+  text-decoration: none;
+}
+
+.teethList-link:hover {
+  text-decoration: underline;
+}
+
+.teethList-action-icons {
+  display: flex;
+  gap: 10px;
+}
+
+.teethList-edit-button,
+.teethList-delete-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.teethList-edit-button {
+  color: #3b82f6;
+}
+
+.teethList-delete-button {
+  color: #ef4444;
+}
+
+.firstElementOfTHS{
+  display: flex;
+  justify-content: center !important;
+  text-align: center;
+} 

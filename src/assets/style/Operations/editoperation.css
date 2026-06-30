@@ -1,0 +1,226 @@
+.editOperation-container {
+  height: auto;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.editOperation-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.editOperation-form-group {
+  display: flex;
+  display: flex;
+  justify-content: space-between;
+  >input{
+    max-width: 800px;
+    width: 100%;
+  }
+}
+
+.editOperation-form-group label {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 8px;
+  font-weight: 500;
+  >span{
+    color: red;
+  }
+}
+
+.editOperation-input {
+  height: 40px;
+  border: 1px solid #CDD5DF;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.editOperation-form-group-prices{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.editOperation-form-group-prices label {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+
+
+.editOperation-price-inputs {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.editOperation-price-input-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 120px;
+}
+
+.editOperation-price-input-group label {
+  font-size: 14px;
+  color: #40BC2B ;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.editOperation-price-input {
+  height: 40px;
+  border: 1px solid #CDD5DF;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.editOperation-checkbox-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.editOperation-form-group-tech{
+  display: flex;
+  >input{
+    margin-left: 140px;
+  }
+  
+}
+
+.editOperation-form-group-tech label {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 8px;
+  font-weight: 500;
+  >span{
+    color: red;
+  }
+}
+
+.editOperation-checkbox-group label {
+  margin-bottom: 0;
+}
+
+.editOperation-checkbox {
+  width: 20px;
+  height: 20px;
+}
+
+.editOperation-insurance-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.editOperation-section-label {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.editOperation-insurance-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+}
+
+.editOperation-insurance-label {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+  flex: 1;
+}
+
+.editOperation-insurance-input-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid #CDD5DF;
+  border-radius: 8px;
+  height: 40px;
+  overflow: hidden;
+  flex: 2;
+  max-width: 800px;
+}
+
+.editOperation-insurance-input {
+  border: none;
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+  flex: 1;
+  height: 100%;
+  border-right: 1px solid #CDD5DF;
+}
+
+.editOperation-insurance-input:nth-last-child(2) {
+  border-right: none;
+}
+
+.editOperation-currency-symbol {
+  background-color: #F3F4F6;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  color: #444;
+  font-size: 16px;
+  border-left: 1px solid #CDD5DF;
+}
+
+.editOperation-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: auto;
+  padding-top: 30px;
+}
+
+.editOperation-cancel-button,
+.editOperation-save-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.editOperation-cancel-button {
+  background-color: #fff;
+  border: 1px solid #CDD5DF;
+  color: #6B7280;
+}
+
+.editOperation-cancel-button:hover {
+  background-color: #F3F4F6;
+}
+
+.editOperation-save-button {
+  background-color: #155EEF;
+  border: 1px solid #155EEF;
+  color: #fff;
+}
+
+.editOperation-save-button:hover {
+  background-color: #124EC2;
+}

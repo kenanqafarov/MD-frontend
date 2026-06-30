@@ -1,0 +1,225 @@
+.addOperation-container {
+  height: auto;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.addOperation-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.addOperation-form-group {
+  display: flex;
+  justify-content: space-between;
+  >
+  input {
+    max-width: 800px;
+    width: 100%;
+  }
+}
+
+.addOperation-form-group label {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 8px;
+  font-weight: 500;
+  >
+  span {
+    color: red;
+  }
+}
+
+.addOperation-input {
+  height: 40px;
+  border: 1px solid #CDD5DF;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.addOperation-form-group-prices {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.addOperation-form-group-prices label {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.addOperation-price-inputs {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.addOperation-price-input-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 120px;
+}
+
+.addOperation-price-input-group label {
+  font-size: 14px;
+  color: #40BC2B;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.addOperation-price-input {
+  height: 40px;
+  border: 1px solid #CDD5DF;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.addOperation-checkbox-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.addOperation-form-group-tech {
+  display: flex;
+  >
+  input {
+    margin-left: 140px;
+  }
+}
+
+.addOperation-form-group-tech label {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 8px;
+  font-weight: 500;
+  >
+  span {
+    color: red;
+  }
+}
+
+.addOperation-checkbox-group label {
+  margin-bottom: 0;
+}
+
+.addOperation-checkbox {
+  width: 20px;
+  height: 20px;
+}
+
+.addOperation-insurance-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.addOperation-section-label {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.addOperation-insurance-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.addOperation-insurance-label {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+  flex: 1;
+}
+
+.addOperation-insurance-input-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid #CDD5DF;
+  border-radius: 8px;
+  height: 40px;
+  overflow: hidden;
+  flex: 2;
+  max-width: 800px;
+}
+
+.addOperation-insurance-input {
+  border: none;
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+  flex: 1;
+  height: 100%;
+  border-right: 1px solid #CDD5DF;
+}
+
+.addOperation-insurance-input:nth-last-child(2) {
+  border-right: none;
+}
+
+.addOperation-currency-symbol {
+  background-color: #F3F4F6;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  color: #444;
+  font-size: 16px;
+  border-left: 1px solid #CDD5DF;
+}
+
+.addOperation-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: auto;
+  padding-top: 30px;
+}
+
+.addOperation-cancel-button,
+.addOperation-save-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.addOperation-cancel-button {
+  background-color: #fff;
+  border: 1px solid #CDD5DF;
+  color: #6B7280;
+}
+
+.addOperation-cancel-button:hover {
+  background-color: #F3F4F6;
+}
+
+.addOperation-save-button {
+  background-color: #155EEF;
+  border: 1px solid #155EEF;
+  color: #fff;
+}
+
+.addOperation-save-button:hover {
+  background-color: #124EC2;
+}

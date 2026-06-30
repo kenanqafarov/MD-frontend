@@ -1,0 +1,81 @@
+.generalSettingsWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 600px;
+    padding: 20px;
+    background-color: #fff;
+
+  }
+  
+  .editIconForGeneralSettings {
+    position: absolute;
+    cursor: pointer;
+    top: 20px;
+    right: 20px;
+    font-size: 20px;
+    color: #155EEF;
+
+    
+  }
+  
+  .general-settings-container {
+    position: relative;
+    background-color: #f9f9f9;
+    padding: 60px 40px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 900px;
+    font-family: "Segoe UI", sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .setting-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .setting-item label {
+    flex: 0 0 220px;
+    font-weight: 500;
+    color: #333;
+    font-size: 15px;
+  }
+  
+  .setting-item input[type="text"] {
+    flex: 1;
+    padding: 10px 14px;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f5f7fa;
+    color: #333;
+  }
+  
+  .setting-item input[type="text"]:read-only {
+    cursor: default;
+  }
+  
+  .toggle-switch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .toggle-switch input[type="checkbox"] {
+    display: none;
+  }
+  
+  .status-label {
+    background-color: #f24e4e;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  

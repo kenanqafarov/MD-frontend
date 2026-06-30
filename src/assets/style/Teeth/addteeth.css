@@ -1,0 +1,159 @@
+.addTeethContainer{
+  height: 100vh;
+}
+
+.addteeth-form {
+  background: #fff;
+  border-radius: 10px;
+  padding: 32px 24px 24px 24px;
+  height: 100%;
+  width: 100%;
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.addteeth-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+  
+}
+
+.imagesRowToUploadTeeth{
+  padding: 10px 20px;
+  border: 1px solid #CDD5DF;
+  border-radius: 8px;
+
+}
+
+.addteeth-row label {
+  font-size: 15px;
+  color: #222;
+  margin-bottom: 6px;
+}
+
+.addteeth-required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.addteeth-row select {
+  height: 40px;
+  border: 1px solid #CDD5DF;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 15px;
+  background: #f9fafb;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.addteeth-row select:focus {
+  border: 1.5px solid #155EEF;
+}
+
+.addteeth-upload-box {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.addteeth-upload-btn {
+  background: #155EEF;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.addteeth-upload-btn:hover {
+  background: #0943b9;
+  transform: scale(0.98);
+}
+
+.addteeth-images-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 10px 20px;
+  
+
+}
+
+.addteeth-image-item {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  background: #f3f6fb;
+}
+
+.addteeth-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.addteeth-remove-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(255,255,255,0.85);
+  border: none;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ef4444;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.addteeth-remove-btn:hover {
+  background: #ffeaea;
+}
+
+.addteeth-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.addteeth-cancel-btn {
+  background: #fff;
+  color: #155EEF;
+  border: 1px solid #155EEF;
+  border-radius: 8px;
+  padding: 8px 22px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.addteeth-cancel-btn:hover {
+  background: #f3f6fb;
+}
+
+.addteeth-save-btn {
+  background: #155EEF;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 22px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.addteeth-save-btn:hover {
+  background: #0943b9;
+} 

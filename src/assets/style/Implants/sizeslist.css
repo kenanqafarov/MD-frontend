@@ -1,0 +1,191 @@
+.sizesPageWrapper {
+  height: 100vh;
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+.sizesCategoryQuickSearch {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.sizesCategoryLeftPart {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.sizesCategoryLeftPart select {
+  width: 128px;
+  height: 36px;
+  border: 1px solid #CDD5DF;
+  padding-left: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.searchForNameSizes {
+  position: relative;
+}
+
+.searchForNameSizes input {
+  height: 36px;
+  width: 267px;
+  border: 1px solid #CDD5DF;
+  border-radius: 8px;
+  padding-left: 10px;
+  padding-right: 40px;
+  font-size: 14px;
+  outline: none;
+}
+
+.searchForNameSizes .searchForNameIcon {
+  position: absolute;
+  right: 12px;
+  top: 9px;
+  color: #666;
+  font-size: 20px;
+}
+
+.sizesCategoryRightPart {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.addNewSizesCategory {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid #155EEF;
+  border-radius: 8px;
+  font-weight: 500;
+  height: 45px;
+  width: 186px;
+  color: #155EEF;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.addNewSizesCategory span {
+  font-size: 20px;
+}
+
+.exportSizesCategoriesData {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #155EEF;
+  font-size: 20px;
+}
+
+.sizesPageTableWrapper {
+  overflow-x: auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sizesPageTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.sizesPageTable th,
+.sizesPageTable td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sizesPageTable th:first-child,
+.sizesPageTable td:first-child {
+  border-right: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.sizesPageTable th {
+  background-color: #f3f6fb;
+  color: #374151;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sizesPageTable th span {
+  display: flex;
+}
+
+.sizesPageTable th span .arrowIconsNow {
+  font-size: 15px;
+}
+
+.sizesPageTable th .arrowIconsNow {
+  margin-left: 5px;
+  cursor: pointer;
+  color: #888;
+  font-size: 16px;
+  vertical-align: middle;
+}
+
+.sizesPageTable td {
+  color: #333;
+}
+
+.sizesPageTable td a {
+  color: #155EEF;
+  text-decoration: none;
+}
+
+.sizesPageTable td a:hover {
+  text-decoration: underline;
+}
+
+.statusBadge {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.statusBadge.active {
+  background-color: #22c55e;
+  color: white;
+}
+
+.statusBadge.passive {
+  background-color: #FD4A3D;
+  color: white;
+}
+
+.sizesActionIcons {
+  display: flex;
+  gap: 10px;
+}
+
+.editBtn,
+.deleteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.editBtn {
+  color: #3b82f6;
+}
+
+.deleteBtn {
+  color: #ef4444;
+}
+
+.sizesNameCol {
+  /* This class was specific to anamnesisNameCol but might be needed for sizesNameCol if it has unique styling */
+} 

@@ -1,0 +1,162 @@
+.stock-export-container {
+    background-color: #fff;
+    border-radius: 10px;
+    height: 100vh;
+  }
+  
+  .search-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .searchBarContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .searchBarContainer input {
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    width: 300px;
+    padding-right: 35px;
+    font-size: 14px;
+  }
+  
+  .searchBarContainer input:focus {
+    outline: none;
+    border-color: #2196F3;
+  }
+  
+  .searchIconBTN {
+    position: absolute;
+    right: 10px;
+    color: #666;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
+  .download-btn {
+    color:#155EEF ;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+  }
+  
+  thead {
+    background-color: #f5f5f5;
+  }
+  
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 12px;
+  }
+  td{
+    text-align: center;
+  }
+  
+  th span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+  }
+  
+  .tableArrowIcon {
+    font-size: 16px;
+    color: #666;
+  }
+  
+  th {
+    font-weight: 600;
+    color: #333;
+  }
+  
+  tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .icons {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .icons svg {
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
+  .icons .info {
+    color: #2196F3;
+  }
+  
+  .icons .edit {
+    color: #4CAF50;
+  }
+  
+  .icons .delete {
+    color: #f44336;
+  }
+  
+  .status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .status.active {
+    background-color: #e8f5e9;
+    color: #4CAF50;
+  }
+  
+  .status.passive {
+    background-color: #ffebee;
+    color: #f44336;
+  }
+  
+  /* Responsive adjustments */
+  @media screen and (max-width: 768px) {
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    th, td {
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+  }
+
+
+  .stockExportCheckIconContainer{
+        display: flex;
+        justify-content: center;
+        >.stockExportCheckIcon{
+            color:#45a049;
+            font-size: 15px;
+          }
+
+    }

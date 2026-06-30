@@ -1,0 +1,83 @@
+.login-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  max-height: 100vh;
+  height: 100vh;
+  background-image: url("/src/assets/images/login-page-images/login-background-now.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+.login-container {
+  /* position: relative; */
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+  align-items: center;
+  overflow: hidden;
+  transition: all 0.5s ease;
+  padding: 0 20px;
+  height: 100%;
+  position: relative;
+}
+
+.login-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+}
+/* dafa */
+.background-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(25px);
+  z-index: 1;
+  transition: all 0.8s ease;
+  opacity: 1;
+}
+
+/* Arxa qat açılır */
+.login-container.ready .background-overlay {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+}
+
+/* Spinner */
+.spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #007bff;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

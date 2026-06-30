@@ -1,0 +1,172 @@
+.editOperationWrapper {
+  height: 100vh;
+  border-radius: 10px;
+}
+
+.editOperationContainer {
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 30px; /* Adjusted gap to accommodate new elements */
+}
+
+.editOperationInputGroup {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.editOperationInputGroup p {
+  min-width: 200px; /* Adjust as needed */
+}
+
+.editOperationInputGroup p span {
+  color: red;
+}
+
+.editOperationInputGroup input {
+  width: 100%;
+  max-width: 852px;
+  height: 44px;
+  border: 1px solid #CDD5DF;
+  border-radius: 10px;
+  padding-left: 10px;
+  outline: none;
+}
+
+.editOperationCheckboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-left: 220px; /* Align with input fields */
+}
+
+.editOperationCheckboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.editOperationCheckboxLabel input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #CDD5DF;
+  border-radius: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.editOperationCheckboxLabel input[type="checkbox"]:checked {
+  background-color: #155EEF;
+  border-color: #155EEF;
+}
+
+.editOperationCheckboxLabel input[type="checkbox"]::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background-color: white; /* This will be the checkmark color */
+  opacity: 0; /* Hidden by default */
+}
+
+.editOperationCheckboxLabel input[type="checkbox"]:checked::before {
+  opacity: 1; /* Show when checked */
+}
+
+.editOperationInsuranceSection {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.editOperationInsuranceItem {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.editOperationInsuranceItem p {
+  min-width: 200px; /* Align with input labels */
+}
+
+.editOperationPercentageInput {
+  display: flex;
+  align-items: center;
+  border: 1px solid #CDD5DF;
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 852px;
+  height: 44px;
+}
+
+.editOperationPercentageInput input {
+  border: none;
+  outline: none;
+  padding: 0 10px;
+  flex-grow: 1;
+  height: 100%;
+  border-right: 1px solid #CDD5DF; /* Add right border to input */
+}
+
+.editOperationPercentageInput span {
+  padding: 0 10px;
+  background-color: transparent; /* Make background transparent */
+  /* Removed border-left as border is now on input */
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #555; /* Slightly darker color for the icon for better visibility */
+}
+
+.editOperationButtons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  padding-right: 20px;
+}
+
+.cancelFormCondition,
+.acceptFormCondition {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 500;
+  border-radius: 10px;
+  padding: 8px 20px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cancelFormCondition {
+  border: 1px solid #155EEF;
+  color: #155EEF;
+  background: none;
+}
+
+.acceptFormCondition {
+  border: 1px solid #155EEF;
+  background: #155EEF;
+  color: #fff;
+}
+
+.cancelFormCondition svg,
+.acceptFormCondition svg {
+  font-size: 18px;
+} 

@@ -1,0 +1,150 @@
+.employeeWorkScheduleList {
+  background: white;
+  border-radius: 8px;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.ews-filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 24px 0 24px;
+  background: #fff;
+}
+.ews-filter-select {
+  width: 180px;
+  height: 36px;
+  border: 1px solid #CDD5DF;
+  border-radius: 8px;
+  padding-left: 8px;
+  font-size: 15px;
+  outline: none;
+  transition: border 0.2s;
+}
+.ews-filter-select:focus {
+  border-color: #155EEF;
+}
+.ews-filter-btn {
+  background: #EEF2F6;
+  border: none;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  color: #697586;
+  margin-left: 4px;
+}
+.ews-date-range {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: 600;
+  font-size: 18px;
+}
+.ews-date-range-sub {
+  font-size: 13px;
+  color: #697586;
+  font-weight: 400;
+}
+.ews-date-arrows {
+  display: flex;
+  gap: 8px;
+  margin-left: 16px;
+}
+.ews-date-arrows button {
+  background: #EEF2F6;
+  border: none;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  color: #697586;
+}
+
+.ews-table-wrapper {
+  margin: 32px 24px 0 24px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.07);
+  overflow-x: auto;
+}
+.ews-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 900px;
+}
+.ews-table thead tr {
+  background: #F8FAFC;
+}
+.ews-table th, .ews-table td {
+  text-align: center ;
+  padding: 12px 8px;
+  font-size: 15px;
+  border-bottom: 1px solid #E5E7EB;
+}
+.ews-table th {
+  font-weight: 700;
+  color: #344054;
+  background: #F8FAFC;
+}
+.ews-table .ews-day-num {
+  font-size: 13px;
+  color: #697586;
+  font-weight: 400;
+}
+.ews-table tbody tr {
+  transition: background 0.2s;
+}
+.ews-table tbody tr:hover {
+  background: #F3F4F6;
+}
+.ews-cell-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+.ews-schedule-block {
+  min-width: 110px;
+  padding: 6px 0 4px 0;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 auto;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.ews-schedule-block-blue {
+  background: #4F8CFF;
+}
+.ews-schedule-block-green {
+  background: #6FCF97;
+}
+.ews-schedule-block-pink {
+  background: #F299C0;
+}
+.ews-room {
+  font-size: 12px;
+  font-weight: 400;
+  color: #fff;
+  margin-top: 2px;
+}
+
+/* Xəta və loading üçün */
+.errorText {
+  color: #FD4A3D;
+  text-align: center;
+  margin-top: 24px;
+  font-size: 16px;
+}
+

@@ -1,0 +1,198 @@
+.workersSearchInputs{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    >.leftPart{
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        >input{
+            padding: 8px ;
+            padding-left: 10px !important;
+            width: 170px;
+            padding-left: 5px;
+            border: 1px solid #CDD5DF;
+            border-radius: 8px;
+            &:focus{
+                outline: none;
+            }
+        }
+        >.searchBTN{
+            font-size: 20px;
+        }
+    }
+    >.rightPart{
+        >.workersStatusChecker{
+            width: 140px;
+            padding: 8px;
+            border: 1px solid #CDD5DF;
+            border-radius: 8px;
+            >option{
+
+                padding-right: 10px;
+                &:focus{
+                    outline: none;
+                }
+            }
+        }
+    }
+}
+
+.employeeListPageContainer{
+  height: 100vh;
+}
+
+.employeesListWrapper{
+  height: 100% !important;
+    background: white;
+    border-radius: 8px;
+    width: 100%;
+}
+
+
+.employeesTableWrapper {
+    background-color: white !important;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    width: 500px;
+    margin-top: 20px ;
+
+    .employeesTable {
+      border-collapse: collapse;
+  
+      thead {
+        background-color: #EEF2F6;
+  
+        tr {
+          font-weight: 300;
+  
+          th {
+            padding: 12px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            border-bottom: none;
+  
+            .th-content {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+  
+              svg {
+                font-size: 14px;
+                color: #9AA4B2;
+              }
+  
+              span {
+                display: inline-block;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                .tableArrowIcon{
+                  font-size: 10px;
+                }
+              }
+            }
+          }
+        }
+      }
+  
+      tbody {
+        tr {
+          transition: background-color 0.2s;
+  
+          &:hover {
+            background-color: #F3F4F6;
+          }
+  
+          td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #CDD5DF;
+            font-size: 14px;
+  
+            &:first-child {
+              .avatarNameWrapper {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+  
+                .avatar {
+                  width: 32px;
+                  height: 32px;
+                  border-radius: 50%;
+                  object-fit: cover;
+                }
+              }
+            }
+  
+            .status {
+              padding: 4px 10px;
+              border-radius: 8px;
+              color: #fff;
+              font-weight: 500;
+              font-size: 13px;
+  
+              &.active {
+                background-color: #4CAF50;
+              }
+  
+              &.passive {
+                background-color: #f44336;
+              }
+            }
+  
+            .actionsWrapper {
+              display: flex;
+              justify-content: center;
+              gap: 10px;
+  
+              .icon {
+                font-size: 18px;
+                font-weight: 600;
+                transition: transform 0.2s;
+  
+                &:hover {
+                  cursor: pointer;
+                }
+  
+                &.info,
+                &.edit {
+                  color: #155EEF;
+                }
+  
+                &.delete {
+                  color: #FD4A3D;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+.employeeScheduleTableData{
+  color: #155EEF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-weight: 500;
+  >.employeeScheduleTableDataIcon{
+    font-size: 20px;
+  }
+}
+
+/* Web kit */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}

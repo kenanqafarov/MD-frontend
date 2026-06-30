@@ -1,0 +1,208 @@
+.patientsListWrapper{
+    background-color: white;
+    height: 100vh;
+    border-radius: 8px ;
+    border: 1px solid #CDD5DF;
+    
+    /* Yeni əlavə olundu */
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.patientsListSearch{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0; /* Padding-i dəyişdirildi, çünki valideynə əlavə olundu */
+    margin-bottom: 20px; /* Cədvəldən yuxarı boşluq */
+    
+    >.leftPart{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        >input{
+            width: 140px;
+            padding: 6px;
+            border-radius: 8px;
+            outline:1px solid #CDD5DF;
+            &:focus{
+                outline: 2px solid #85b5ef;
+            }
+        }
+        >.searchIconBTN{
+            font-size: 20px;
+        }
+    }
+    >.rightPart{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        >select{
+            width: 160px;
+            border-radius: 8px;
+            padding: 6px;
+            outline:1px solid #CDD5DF;
+            &:focus{
+                outline: 2px solid #85b5ef;
+            }
+        }
+    }
+}
+
+.delete,
+.info,
+.edit
+{
+    font-size: 17px;
+    cursor: pointer;
+}
+
+.tableWrapper {
+    overflow-x: hidden; /* Yalnız dikey fırlanma üçün */
+    overflow-y: auto; /* Yeni əlavə olundu */
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    flex-grow: 1; /* Konteynerin qalan boşluğu doldurmasını təmin edir */
+    
+    .employeeTable {
+        width: 100%;
+        border-collapse: collapse;
+            
+        th,
+        td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #CDD5DF;
+        }
+    
+        thead {
+            background-color: #EEF2F6;
+            
+            tr {
+                font-weight: 300;
+            
+                th {
+                    border-bottom: none;
+                    font-size: 14px;
+                    font-weight: 600;
+                    position: sticky; /* Başlığı sabit saxlamaq üçün */
+                    top: 0;
+                    background-color: #EEF2F6;
+                    z-index: 10;
+            
+                    .th-content {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 6px;
+            
+                        svg {
+                            font-size: 14px;
+                        }
+            
+                        span {
+                            display: inline-block;
+                        }
+                    }
+                }
+            }
+        }
+    
+        tbody {
+            tr {
+                td {
+                    border-top: none;
+                    font-size: 14px;
+                }
+            }
+        }
+    }
+}
+ 
+.status {
+    padding: 4px 10px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 500;
+    font-size: 13px;
+ 
+    &.active {
+        background-color: #4CAF50;
+    }
+ 
+    &.passive {
+        background-color: #f44336;
+    }
+}
+
+.actionsWrapper {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.icon {
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+.icon.info, .icon.edit {
+    color: #155EEF;
+}
+
+.icon.delete {
+    color: #FD4A3D;
+}
+
+.arrowsIcon {
+    color: #9AA4B2;
+}
+
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 8px;
+    padding-bottom: 20px;
+    flex-shrink: 0; /* Sayfanın aşağısında sabit qalmasını təmin edir */
+}
+
+.pagination button {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #333;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination button:hover:not(:disabled) {
+    background-color: #ddd;
+    color: #000;
+}
+
+.pagination button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.pagination button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* Səhifələmə düymələri arasındakı məsafə */
+.pagination button + button {
+    margin-left: 4px;
+}

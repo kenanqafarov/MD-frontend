@@ -1,0 +1,82 @@
+.addDentalSetWrapper {
+  height: 100vh;
+}
+
+.addDentalSetWrapper > .addDentalSetContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 316px;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.addDentalSetWrapper > .addDentalSetContainer > .addDentalSetInput {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.addDentalSetWrapper > .addDentalSetContainer > .addDentalSetInput > input {
+  width: 932px;
+  height: 44px;
+  border: 1px solid #CDD5DF;
+  padding-left: 10px;
+  border-radius: 8px;
+}
+
+.addDentalSetWrapper > .addDentalSetContainer > .addDentalSetInput > p > span {
+  color: red;
+  margin-left: 10px;
+}
+
+.addDentalSetWrapper > .addDentalSetContainer > .addDentalSetButtons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  padding-right: 20px;
+  margin-top: 50px;
+}
+
+.addDentalSetWrapper > .addDentalSetContainer > .addDentalSetButtons > .cancelFormCondition {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid #155EEF;
+  color: #155EEF;
+  font-weight: 500;
+  border-radius: 10px;
+  padding: 8px 20px;
+}
+
+.addDentalSetWrapper > .addDentalSetContainer > .addDentalSetButtons > .cancelFormCondition > img {
+  height: 14px;
+}
+
+.addDentalSetWrapper > .addDentalSetContainer > .addDentalSetButtons > .acceptFormCondition {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid #155EEF;
+  color: #155EEF;
+  font-weight: 500;
+  border-radius: 10px;
+  padding: 8px 20px;
+  background: #155EEF;
+  color: #fff;
+}
+
+.addDentalSetWrapper > .addDentalSetContainer > .addDentalSetButtons > .acceptFormCondition > img {
+  height: 8px;
+}
+
+.error {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+} 

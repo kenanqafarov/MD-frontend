@@ -1,0 +1,125 @@
+.editOperationPictureContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  background-attachment: fixed;
+}
+
+.editOperationPictureForm {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  max-width: 450px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.editOperationPictureRow {
+  margin-bottom: 25px;
+}
+
+.editOperationPictureRow label {
+  display: block;
+  color: #2d3748;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.editOperationPictureRequired {
+  color: #e53e3e;
+  font-size: 16px;
+  margin-left: 4px;
+}
+
+.editOperationPictureRow select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  color: #2d3748;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.editOperationPictureRow select:focus {
+  outline: none;
+  border-color: #155EEF;
+  box-shadow: 0 0 0 3px rgba(21, 94, 239, 0.1);
+}
+
+.editOperationPictureRow select:disabled {
+  background: #f0f4f8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.editOperationPictureActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.editOperationPictureCancelBtn,
+.editOperationPictureSaveBtn {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.editOperationPictureCancelBtn {
+  background: #f0f4f8;
+  color: #4a5568;
+  border: 1px solid #cbd5e0;
+}
+
+.editOperationPictureCancelBtn:hover {
+  background: #e2e8f0;
+  transform: translateY(-2px);
+}
+
+.editOperationPictureCancelBtn img {
+  width: 18px;
+  height: 18px;
+}
+
+.editOperationPictureSaveBtn {
+  background: #155EEF;
+  color: white;
+}
+
+.editOperationPictureSaveBtn:hover {
+  background: #0d47a1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 71, 161, 0.3);
+}
+
+.editOperationPictureSaveBtn img {
+  width: 18px;
+  height: 18px;
+}
+
+.editOperationPictureCancelBtn:disabled,
+.editOperationPictureSaveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

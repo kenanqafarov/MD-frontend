@@ -1,0 +1,39 @@
+/* Validation Error Styles */
+.validation-error-container {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #fee;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  margin-top: 5px;
+  color: #721c24;
+  font-size: 14px;
+}
+
+.validation-error-icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.validation-error-message {
+  flex: 1;
+}
+
+/* Input error state */
+.addQueueBasicInput:invalid {
+  border-color: #dc3545;
+}
+
+.addQueueBasicInput:focus:invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Responsive design for error messages */
+@media (max-width: 768px) {
+  .validation-error-container {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}

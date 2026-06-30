@@ -1,0 +1,169 @@
+.stockExportsContainer {
+  background-color: #fff;
+  border-radius: 10px;
+  height: 100vh;
+}
+
+.stockExportsSearchBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+}
+
+.stockExportsSearchBarContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.stockExportsSearchBarContainer input {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  width: 300px;
+  padding-right: 35px;
+  font-size: 14px;
+}
+
+.stockExportsSearchBarContainer input:focus {
+  outline: none;
+  border-color: #2196F3;
+}
+
+.stockExportsSearchIcon {
+  position: absolute;
+  right: 10px;
+  color: #666;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.stockExportsAddButton {
+  background-color: #155EEF;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: 0.4s ease;
+}
+
+.stockExportsAddButton:hover {
+  background-color: #083da8;
+}
+
+.stockExportsTableContainer {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.stockExportsTableContainer table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+}
+
+.stockExportsTableContainer thead {
+  background-color: #f5f5f5;
+}
+
+.stockExportsTableContainer th,
+.stockExportsTableContainer td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 12px;
+}
+
+.stockExportsTableContainer th {
+  font-weight: 600;
+  color: #333;
+  text-align: left;
+}
+
+.stockExportsTableContainer th:first-child {
+  border-right: 1px solid #e0e0e0;
+  text-align: center !important;
+}
+
+.stockExportsTableContainer td {
+  text-align: center;
+}
+
+.stockExportsTableContainer th span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  justify-content: flex-start;
+}
+
+.stockExportsTableArrowIcon {
+  font-size: 16px;
+  color: #666;
+}
+
+.stockExportsTableContainer tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.stockExportsIcons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.stockExportsInfoIcon {
+  color: #0D99FF;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.stockExportsEditIcon {
+  color: #0D99FF;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.stockExportsDeleteIcon {
+  color: #0D99FF;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.stockExportsStatus {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.stockExportsStatusActive {
+  background-color: #e8f5e9;
+  color: #4CAF50;
+}
+
+.stockExportsEditIcon{
+  color: #0D99FF;
+}
+.stockExportsDeleteIcon{
+  color: red;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .stockExportsTableContainer {
+    overflow-x: auto;
+  }
+  
+  .stockExportsTableContainer th,
+  .stockExportsTableContainer td {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}

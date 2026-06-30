@@ -1,0 +1,163 @@
+.infoExaminationPictureContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.infoExaminationPictureWrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  width: 100%;
+}
+
+.infoExaminationPictureHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.infoExaminationPictureHeader h2 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.infoExaminationPictureEditIconButton {
+  background: #155EEF;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.infoExaminationPictureEditIconButton:hover {
+  background: #0d47a1;
+  transform: scale(1.05);
+}
+
+.infoExaminationPictureEditIcon {
+  color: white;
+  font-size: 20px;
+}
+
+.infoExaminationPictureContent {
+  margin-bottom: 30px;
+}
+
+.infoExaminationPictureRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.infoExaminationPictureRow label {
+  color: #718096;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.infoExaminationPictureRow span {
+  color: #2d3748;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.infoExaminationPictureStatusBadge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.infoExaminationPictureStatusBadge.active {
+  background: #c3e7f0;
+  color: #00796b;
+}
+
+.infoExaminationPictureStatusBadge.inactive {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.infoExaminationPictureActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.infoExaminationPictureCancelButton,
+.infoExaminationPictureDeleteButton,
+.infoExaminationPictureConfirmButton {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.infoExaminationPictureCancelButton {
+  background: #f0f4f8;
+  color: #4a5568;
+  border: 1px solid #cbd5e0;
+}
+
+.infoExaminationPictureCancelButton:hover {
+  background: #e2e8f0;
+  transform: translateY(-2px);
+}
+
+.infoExaminationPictureDeleteButton {
+  background: #fed7d7;
+  color: #c53030;
+  border: 1px solid #fc8181;
+}
+
+.infoExaminationPictureDeleteButton:hover {
+  background: #fc8181;
+  transform: translateY(-2px);
+}
+
+.infoExaminationPictureConfirmButton {
+  background: #155EEF;
+  color: white;
+  border: none;
+}
+
+.infoExaminationPictureConfirmButton:hover {
+  background: #0d47a1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 71, 161, 0.3);
+}
+
+.infoExaminationPictureCancelButton:disabled,
+.infoExaminationPictureDeleteButton:disabled,
+.infoExaminationPictureConfirmButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

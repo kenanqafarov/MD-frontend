@@ -1,0 +1,258 @@
+.sidebar-menu {
+  width: 254px;
+  height: 100vh; /* Full viewport height */
+  background-color: #155EEF;
+  color: white;
+  position: fixed; /* Changed from relative to fixed */
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  z-index: 1000; /* Ensure sidebar stays above other content */
+}
+
+.sidebar-menu.collapsed {
+  width: 84px;
+}
+
+.sidebar-menu.collapsed .menu-item-header {
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebar-menu.collapsed .menu-item-icon {
+  margin-right: 0;
+}
+
+.sidebar-menu.collapsed .sidebar-header {
+  justify-content: center;
+  align-items: center;
+}
+
+/* Make menu-items scrollable if content overflows */
+.menu-items {
+  padding: 20px 0;
+  max-height: calc(100vh - 61px); /* Adjust for sidebar-header height (20px padding + 20px padding + 1px border) */
+  overflow-y: auto; /* Enable vertical scrolling */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox */
+}
+
+/* Webkit-based browsers (Chrome, Safari) scrollbar styling */
+.menu-items::-webkit-scrollbar {
+  width: 6px;
+}
+
+.menu-items::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.menu-items::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+/* Header */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h1 {
+  margin: 0;
+  font-size: 24px;
+  color: white;
+}
+
+.toggle-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Menu Item Styles */
+.menu-item {
+  margin-bottom: 5px;
+}
+
+.menu-item-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.menu-item-header:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.active-header {
+  background-color: white;
+}
+
+.active-header .menu-item-title {
+  color: #155EEF;
+}
+
+.active-header .arrow-icon {
+  color: #155EEF !important;
+}
+
+.active-header .menu-item-icon {
+  background-color: #155EEF !important;
+}
+
+.active-header .menu-item-icon svg path {
+  stroke: #fff !important;
+}
+
+.active-header:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.active-header:hover .menu-item-title {
+  color: white;
+}
+
+.active-header:hover .menu-item-icon svg path {
+  stroke: #fff !important;
+}
+
+.menu-item-icon {
+  background-color: #F8FAFC;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 15px;
+  min-width: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.menu-item-icon.active {
+  background-color: #155EEF !important;
+}
+
+.menu-item-icon.active svg path {
+  stroke: #fff !important;
+}
+
+.menu-item-title {
+  flex: 1;
+  font-size: 16px;
+}
+
+.arrow-icon {
+  transition: transform 0.3s ease;
+}
+
+.arrow-icon.rotated {
+  transform: rotate(-90deg);
+  color: #155EEF;
+}
+
+/* Submenu */
+.submenu {
+  padding-left: 25px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.submenu-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+  color: white;
+  position: relative;
+}
+
+.submenu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.submenu-item.active {
+  font-weight: 500;
+}
+
+.submenu-active-indicator {
+  position: absolute;
+  left: 8px;
+  color: white;
+  font-size: 16px;
+  opacity: 0.8;
+  margin-right: 10px;
+}
+
+.submenu-item-title {
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+/* src/assets/style/sidebar-menu.css */
+.sidebar-menu {
+  width: 254px;
+  height: 100vh; /* Full viewport height */
+  background-color: #155EEF;
+  color: white;
+  position: fixed; /* Sidebar-ın ekranın solunda sabit qalması üçün */
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.sidebar-menu.collapsed {
+  width: 84px;
+}
+
+.sidebar-menu.collapsed .menu-item-header {
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebar-menu.collapsed .menu-item-icon {
+  margin-right: 0;
+}
+
+.sidebar-menu.collapsed .sidebar-header {
+  justify-content: center;
+  align-items: center;
+}
+
+/* Sidebar daxilindəki məzmunun scroll etməsi üçün */
+.menu-items {
+  padding: 20px 0;
+  height: calc(100% - 61px); /* Header-in hündürlüyünü çıxaraq, qalan hissəni tutur */
+  overflow-y: auto; /* Dikey scrollbar əlavə edir */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox */
+}
+
+/* Webkit-based browsers (Chrome, Safari) scrollbar styling */
+.menu-items::-webkit-scrollbar {
+  width: 6px;
+}
+
+.menu-items::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.menu-items::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+/* ... qalan CSS stilləri olduğu kimi qalır ... */

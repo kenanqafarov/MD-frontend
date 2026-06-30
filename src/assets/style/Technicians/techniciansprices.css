@@ -1,0 +1,165 @@
+.techniciansPricesPage {
+  background-color: #fff;
+  border-radius: 10px;
+  height: 100vh;
+
+  .techniciansPricesPageTopPart {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .searchPriceNow {
+      position: relative;
+
+      input {
+        outline: 1px solid #cdd5df;
+        width: 220px;
+        border-radius: 8px;
+        padding: 8px 40px 8px 16px;
+        font-size: 14px;
+
+        &:focus {
+          border: none;
+          outline: 1px solid #cdd5df;
+        }
+      }
+
+      .search-btn {
+        position: absolute;
+        left: 190px;
+        top: 18px;
+        transform: translateY(-50%);
+        font-size: 18px;
+        color: #555;
+        cursor: pointer;
+      }
+    }
+
+    .topPartIconsWrapper {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 20px;
+
+      .penIconForTopPartIcon,
+      .verifyIconForTopPartIcon {
+        color: #155eef !important;
+        font-size: 20px;
+        cursor: pointer;
+      }
+
+      .exportDataNowTech {
+        .exportDataNowIcon {
+          color: #155eef;
+          font-size: 20px;
+        }
+      }
+    }
+  }
+
+  .techniciansPricesTableWrapper {
+    padding: 0 20px;
+
+    .techniciansTable {
+      width: 100%;
+      border-collapse: collapse;
+
+      th,
+      td {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px;
+      }
+
+    thead {
+    background-color: #f1f5f9;
+
+    th {
+        font-size: 14px;
+        vertical-align: middle;
+
+        span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }
+
+        &:nth-child(1) {
+        text-align: center !important;
+        border-right: 1px solid #CDD5DF;
+        width: 60px;
+        }
+
+        &:nth-child(2) {
+        text-align: left !important;
+        width: 600px;
+        }
+
+        &:nth-child(3) {
+        text-align: center;
+        width: 150px;
+        }
+
+        &:nth-child(4) {
+        text-align: left !important;
+        width: 120px;
+        }
+
+        .th-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+
+        .tableArrowIcon {
+            font-size: 14px;
+            color: #555;
+        }
+        }
+    }
+    }
+
+
+      tbody {
+        td {
+          vertical-align: middle;
+
+          &:nth-child(1) {
+            text-align: center;
+            border-right: 1px solid #CDD5DF;
+          }
+
+          &:nth-child(2) {
+            text-align: left;
+          }
+
+          &:nth-child(3) {
+            text-align: center;
+          }
+        }
+      }
+
+      .editableInput {
+        width: 100px;
+        padding: 0px 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+
+        &:focus {
+          outline: none;
+          border-color: #155eef;
+        }
+      }
+    }
+  }
+}
+th:nth-child(4) span {
+  justify-content: flex-start !important;
+}
+
+.verifyIcon{
+    color: #155eef !important;
+    font-size: 20px;
+    cursor: pointer;
+}

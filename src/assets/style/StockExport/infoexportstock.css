@@ -1,0 +1,299 @@
+.infoExportPageWrapper{
+    height: 100vh !important;
+}
+
+.infoExportStockContainerTopButtons{
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-bottom: 20px;
+    >.infoExportStockContainerTopButtonDetail{
+        font-size: 20px;
+        cursor: pointer;
+        color: #4169E1;
+    }
+    >.infoExportStockContainerTopButtonDelete{
+        font-size: 20px;
+        cursor: pointer;
+        color: red;
+    }
+}
+
+.infoExportStockContainer {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    margin-bottom: calc(100vh - 600px);
+}
+
+.infoExportStockTopPart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.infoExportStockFormGroup {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    justify-content: space-between !important;
+}
+
+.infoExportStockFormGroup label {
+    font-weight: 500;
+    color: #333;
+}
+
+.infoExportStockFormGroup input,
+.infoExportStockFormGroup textarea {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 900px;
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.infoExportStatusContainer{
+     width: 900px;
+     border: 1px solid #ddd;
+     padding: 8px 10px;
+     border-radius: 4px;
+    .infoExportStockStatus {
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 14px;
+        width: 100px;
+        text-align: center;
+        font-weight: 500;
+    }
+    .infoExportPENDING {
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        color: #856404;
+    }
+    
+}
+
+/* Status styles */
+
+/* Status variations */
+
+.infoExportAPPROVED {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.infoExportREJECTED {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.infoExportPROCESSING {
+    background-color: #cce5ff;
+    border: 1px solid #b8daff;
+    color: #004085;
+}
+
+.infoExportCOMPLETED {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.infoExportStockFormGroup textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.infoExportStockTableSection {
+    margin: 30px 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 125px;
+}
+
+.infoExportStockTableSection h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-weight: 500;
+}
+
+.infoExportStockTable {
+    width: 100%;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+}
+
+.infoExportStockTable th,
+.infoExportStockTable td {
+    padding: 12px;
+    text-align: left;
+}
+
+.infoExportStockTable th {
+    background-color: #f8f9fa;
+    font-weight: 500;
+}
+
+.infoExportStockTable input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.infoExportStockUpload {
+    display: flex;
+    align-items: center;
+    gap: 125px;
+}
+
+.infoExportStockDocumentLabel {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: #333;
+}
+
+.infoExportStockUploadButtonContainer{
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    width: 100%;
+}
+
+.infoExportStockDocumentLabelRequired{
+    color: red;
+}
+
+.uploadContainer {
+    margin-top: 10px;
+    width: 100%;
+}
+
+.infoExportStockUploadButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #4169E1;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.infoExportStockUploadButton:hover {
+    background-color: #3157cc;
+}
+
+.imagePreviewContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.imagePreview {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.imagePreview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.deleteButton {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.deleteButton:hover {
+    background-color: #f8f9fa;
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.modalContent img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+}
+
+.infoExportStockButtonGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.infoExportStockCancelButton,
+.infoExportStockSaveButton {
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.infoExportStockCancelButton {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    color: #333;
+}
+
+.infoExportStockSaveButton {
+    background-color: #4169E1;
+    border: none;
+    color: white;
+}
+
+.infoExportStockCancelButton:hover {
+    background-color: #f8f9fa;
+}
+
+.infoExportStockSaveButton:hover {
+    background-color: #3157cc;
+}
