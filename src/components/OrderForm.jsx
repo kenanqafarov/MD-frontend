@@ -52,7 +52,13 @@ const formatDate = (dateString) => {
   }
 };
 
-const OrderForm = ({ initialData, mode = "create", onSubmit, onCancel }) => {
+const OrderForm = ({
+  initialData,
+  mode = "create",
+  onSubmit,
+  onCancel,
+  lockedPatientId = null,
+}) => {
   const { register, handleSubmit, setValue, watch, reset } = useForm({
     defaultValues: initialData || {},
   });
@@ -423,7 +429,7 @@ const OrderForm = ({ initialData, mode = "create", onSubmit, onCancel }) => {
               }
               placeholder="Pasiyent seçin"
               name="patient"
-              disabled={mode === "view"}
+              disabled={mode === "view" || lockedPatientId !== null}
             />
           </div>
         </div>

@@ -14,7 +14,8 @@ import {
   faXRay,
   faImage,
   faVideo,
-  faFileAlt
+  faFileAlt,
+  faFlask
 } from '@fortawesome/free-solid-svg-icons';
 
 import { useParams } from "react-router-dom"; // Import useParams
@@ -58,6 +59,12 @@ const PatientLayout = () => {
             className={isActive(`/patients/patient/${id}/treatment`) ? 'active' : ''}
           >
             <FontAwesomeIcon icon={faNotesMedical} /> Müalicə
+          </Link>
+          <Link
+            to={`/patients/patient/${id}/laboratory`}
+            className={isActive(`/patients/patient/${id}/laboratory`) ? 'active' : ''}
+          >
+            <FontAwesomeIcon icon={faFlask} /> Laboratoriya
           </Link>
           <Link 
             to={`/patients/patient/${id}/history`}
