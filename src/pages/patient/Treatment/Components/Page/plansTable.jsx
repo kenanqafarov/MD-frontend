@@ -111,6 +111,11 @@ const PlansTable = ({ data = [], onDelete, onSelectionChange, onConfirmSelection
 
   // Təsdiq buttonuna basıldıqda
   const handleConfirmSelection = () => {
+    console.log('[PlansTable] handleConfirmSelection click', {
+      selectedRowKeys,
+      selectedRowsLength: selectedRows?.length,
+    });
+
     // Seçilmiş dişlərin tüm details'lerini topla
     const allSelectedDetails = [];
     selectedRows.forEach(row => {
@@ -127,8 +132,15 @@ const PlansTable = ({ data = [], onDelete, onSelectionChange, onConfirmSelection
     
     const selectedIds = [...new Set(selectedRows.map(row => row.id))];
     if (onConfirmSelection) {
+      console.log('[PlansTable] onConfirmSelection', {
+        selectedIds,
+        selectedRowKeys,
+        selectedRowsLength: selectedRows?.length,
+        allSelectedDetailsLength: allSelectedDetails?.length,
+      });
       onConfirmSelection(selectedIds, allSelectedDetails);
     }
+
   };
 
   // rowSelection konfiqurasiyası - yalnız ana sətirlər (dişlər) seçilə bilər

@@ -823,18 +823,48 @@ const Plans = () => {
                       })
                       .filter(item => item.planId !== null && item.planId !== undefined);
 
+                    // Backend tərəfindən gözlənilən formatdan asılı olaraq düzəldilir.
+                    // PlansTable-da "allSelectedDetails" aşağıdakı sahələri verir:
+                    // - id (patientPlanId)
+                    // - partOfToothId (detail.partOfToothId)
+                    // - partId (detail.id)
+
+                    // backend /patient-treatment/create endpointi üçün payload
+                    // backend doc: patientPlansRequests[].planId, patientPlansRequests[].isChecked
                     const payload = {
                       planMainId: selectedPlanId,
-                      patientPlansRequests: patientPlansRequests
+                      patientPlansRequests: patientPlansRequests.map((x) => ({
+                        planId: x.planId,
+                        isChecked: x.isChecked ?? true,
+                      })),
                     };
 
                     const result = await createPatientTreatmentFromStore(payload);
+                    console.log('[createPatientTreatment] result', result);
 
                     if (result.success && (result.status === 200 || result.status === 201)) {
                       message.success('Əməliyyatlar uğurla təsdiqləndi!');
+
+                      // Report avtomatik yenilənməsi üçün refresh token yaz
+                      try {
+                        const refreshKey = `patientReportRefresh-${patientId}`;
+                        const ts = String(Date.now());
+                        console.log('[report-refresh]', { refreshKey, ts });
+                        localStorage.setItem(refreshKey, ts);
+                      } catch (e) {
+                        // localStorage block olsa belə, əsas axını qırmayaq
+                      }
+
+                      // Hesabat səhifəsinə avtomatik keç
+                      try {
+                        window.location.hash = `#/patients/patient/${patientId}/report`;
+                      } catch (_) {}
+
                       // Patient plans datayı yenilə
                       setLoadingPatientPlans(true);
+
                       const plansResult = await readPatientTreatmentByPlanMainIdFromStore(selectedPlanId);
+
                       if (plansResult.success && (plansResult.status === 200 || plansResult.status === 201)) {
                         // Yeni response strukturuna görə: { key, patientPlanMainId, isSave, plans: [...] }
                         const plansArray = plansResult.data?.plans || plansResult.data;

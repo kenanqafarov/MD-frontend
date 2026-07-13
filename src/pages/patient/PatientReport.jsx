@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -89,13 +90,19 @@ const formatFilterDate = (value) =>
   value ? new Date(`${value}T00:00:00`).toLocaleDateString("az-AZ") : "…";
 
 const normalizeReportPage = (data) => {
+  // Backend response (from swagger) typically looks like:
+  // {
+  //   totalElements, totalPages,
+  //   content: [...],
+  //   ...
+  // }
   const page = data?.data || data || {};
   const content = Array.isArray(page) ? page : page.content || page.items || [];
 
   return {
     content,
-    totalPages: Number(page.totalPages || page.pageCount || 0),
-    totalElements: Number(page.totalElements || page.totalCount || content.length),
+    totalPages: Number(page.totalPages ?? page.pageCount ?? 0),
+    totalElements: Number(page.totalElements ?? page.totalCount ?? content.length),
   };
 };
 
@@ -126,6 +133,12 @@ function PatientReport() {
   const { id } = useParams();
   const patientId = Number(id);
   const requestController = useRef(null);
+
+  const getRefreshTokenKey = useCallback(() => {
+    if (!Number.isInteger(patientId) || patientId <= 0) return null;
+    return `patientReportRefresh-${patientId}`;
+  }, [patientId]);
+
 
   const [filters, setFilters] = useState(emptyFilters);
   const [appliedFilters, setAppliedFilters] = useState(emptyFilters);
@@ -165,9 +178,52 @@ function PatientReport() {
         size: pageSize,
         signal: controller.signal,
       });
+
+      // Debug: response shape və əsas sahələri görmək üçün
+      console.log('[PatientReport] raw response', data);
+      console.log('[PatientReport] raw keys', {
+        hasData: !!data?.data,
+        hasContent: Array.isArray(data?.content),
+        contentLen:
+          (Array.isArray(data?.content) ? data.content.length : undefined) ??
+          (Array.isArray(data?.data) ? data.data.length : undefined),
+        totalElements: data?.totalElements ?? data?.data?.totalElements ?? data?.page?.totalElements,
+        pageCount: data?.totalPages ?? data?.data?.totalPages,
+      });
+
+      const first = Array.isArray(data?.content)
+        ? data.content?.[0]
+        : Array.isArray(data?.data?.content)
+          ? data.data.content?.[0]
+          : Array.isArray(data?.data)
+            ? data.data?.[0]
+            : Array.isArray(data?.items)
+              ? data.items?.[0]
+              : undefined;
+
+      if (first) {
+        console.log('[PatientReport] first item fields', {
+          planDate: first.planDate,
+          executionDate: first.executionDate,
+          patientName: first.patientName,
+          teethNo: first.teethNo,
+          operationName: first.operationName,
+          planningDoctorName: first.planningDoctorName,
+          price: first.price,
+          discount: first.discount,
+          finalPrice: first.finalPrice,
+          // alternativ field adlar
+          total: first.total,
+          discountAmount: first.discountAmount,
+          final: first.final,
+        });
+      }
+
       const nextReportPage = normalizeReportPage(data);
 
+
       if (nextReportPage.totalPages && page >= nextReportPage.totalPages) {
+
         setPage(nextReportPage.totalPages - 1);
         return;
       }
@@ -187,9 +243,50 @@ function PatientReport() {
   }, [patientId, appliedFilters, page, pageSize]);
 
   useEffect(() => {
+    const tokenKey = getRefreshTokenKey();
+
+    // initial load
     loadReports();
-    return () => requestController.current?.abort();
-  }, [loadReports]);
+
+    if (!tokenKey) {
+      return () => requestController.current?.abort();
+    }
+
+    const onStorage = (event) => {
+      if (event?.key !== tokenKey) return;
+      loadReports();
+    };
+
+    // when token updated from another tab/window
+    window.addEventListener('storage', onStorage);
+
+    // same tab: listen via polling-ish approach using current value
+    let lastValue;
+    try {
+      lastValue = localStorage.getItem(tokenKey);
+    } catch (_) {}
+
+    const intervalId = window.setInterval(() => {
+      let currentValue;
+      try {
+        currentValue = localStorage.getItem(tokenKey);
+      } catch (_) {
+        currentValue = null;
+      }
+
+      if (currentValue && currentValue !== lastValue) {
+        lastValue = currentValue;
+        loadReports();
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.clearInterval(intervalId);
+      requestController.current?.abort();
+    };
+  }, [loadReports, getRefreshTokenKey]);
+
 
   const rows = useMemo(() => reportPage.content || [], [reportPage.content]);
   const totalPages = reportPage.totalPages || 0;
