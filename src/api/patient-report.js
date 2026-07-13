@@ -1,7 +1,5 @@
 import axiosInstance from "./temp-axios-auth";
 
-const API_BASE_URL = import.meta.env.VITE_BASE_URL || "/api/v1";
-
 export const readPatientReports = async ({
   patientId,
   operationName,
@@ -10,6 +8,7 @@ export const readPatientReports = async ({
   endDate,
   page = 0,
   size = 20,
+  signal,
 }) => {
   const params = {
     patientId,
@@ -23,9 +22,12 @@ export const readPatientReports = async ({
   };
 
   const response = await axiosInstance.post(
-    `${API_BASE_URL}/patient-report/read`,
+    // axiosInstance already has /api/v1 as its base URL. Adding it here as
+    // well produced /api/v1/api/v1/patient-report/read and made this screen
+    // fail even for an authenticated user.
+    "/patient-report/read",
     null,
-    { params }
+    { params, signal }
   );
 
   return response.data;
