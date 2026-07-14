@@ -97,7 +97,7 @@ const SidebarMenu = ({ isCollapsed, toggleSidebar }) => {
     },
     {
       id: 4,
-      title: "Görülmüş işlər",
+      title: "Hesabat",
       path: "reports",
       icon: (isActive) => (
         <WorkDoneIcon
