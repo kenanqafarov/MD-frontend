@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { fetchDashboardReports, fetchDetailedReports } from "../../api/reports";
 import { HiArrowsUpDown } from "react-icons/hi2";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -159,8 +160,12 @@ function ReportsPage() {
     const [activeTab, setActiveTab] = useState('analitika');
     const [selectedPeriod, setSelectedPeriod] = useState('bu_ay');
     const [isLoading, setIsLoading] = useState(false);
-    const [fromDate, setFromDate] = useState('2026-06-30');
-    const [toDate, setToDate] = useState('2026-07-14');
+    const [fromDate, setFromDate] = useState(() => {
+        const d = new Date();
+        d.setDate(d.getDate() - 30);
+        return d.toISOString().split('T')[0];
+    });
+    const [toDate, setToDate] = useState(() => new Date().toISOString().split('T')[0]);
 
     // Detailed view states (Original filters)
     const [plannerDoctor, setPlannerDoctor] = useState(null);
@@ -169,6 +174,12 @@ function ReportsPage() {
     const [operation, setOperation] = useState(null);
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
+
+    // Backend states
+    const [dashboardData, setDashboardData] = useState(null);
+    const [detailedLogs, setDetailedLogs] = useState([]);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
     // Fetch doctors and options on mount
     useEffect(() => {
@@ -179,7 +190,7 @@ function ReportsPage() {
 
     // Format fetched data for dropdowns
     const formattedDoctors = doctors.map(doctor => ({
-        value: doctor.doctorId,
+        value: doctor.name + " " + doctor.surname,
         label: doctor.name + " " + doctor.surname
     }));
 
@@ -189,64 +200,92 @@ function ReportsPage() {
     }));
 
     const formattedOperations = operationTypes.map(op => ({
-        value: op.id,
+        value: op.categoryName,
         label: op.categoryName
     }));
 
-    const handlePeriodChange = (val) => {
+    const loadDashboard = async () => {
         setIsLoading(true);
-        setSelectedPeriod(val);
-        setTimeout(() => {
+        try {
+            const data = await fetchDashboardReports({
+                period: selectedPeriod,
+                fromDate,
+                toDate
+            });
+            setDashboardData(data);
+        } catch (error) {
+            console.error("Failed to load dashboard data:", error);
+        } finally {
             setIsLoading(false);
-        }, 300);
+        }
+    };
+
+    const loadDetailedReports = async (page = 0) => {
+        setIsLoading(true);
+        try {
+            const criteria = {
+                plannerDoctor: plannerDoctor || undefined,
+                executorDoctor: executorDoctor || undefined,
+                operationName: operation || undefined,
+                startDate: startDate ? new Date(startDate).getTime() : undefined,
+                endDate: endDate ? new Date(endDate).getTime() : undefined,
+            };
+
+            const response = await fetchDetailedReports({
+                criteria,
+                page,
+                size: 10
+            });
+            setDetailedLogs(response.content || []);
+            setCurrentPage(response.number || 0);
+            setTotalPages(response.totalPages || 0);
+        } catch (error) {
+            console.error("Failed to load detailed reports:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Load data based on tab and period changes
+    useEffect(() => {
+        if (activeTab === 'detailed') {
+            loadDetailedReports(0);
+        } else {
+            loadDashboard();
+        }
+    }, [activeTab, selectedPeriod, fromDate, toDate]);
+
+    const handlePeriodChange = (val) => {
+        setSelectedPeriod(val);
     };
 
     const triggerRefresh = () => {
-        setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
-        }, 400);
+        if (activeTab === 'detailed') {
+            loadDetailedReports(currentPage);
+        } else {
+            loadDashboard();
+        }
     };
 
     const handleDetailedSearch = () => {
-        console.log("Detailed Search Filters:", {
-            plannerDoctor,
-            executorDoctor,
-            category,
-            operation,
-            startDate,
-            endDate
+        loadDetailedReports(0);
+    };
+
+    const activeData = dashboardData || periodData[selectedPeriod] || periodData["bu_ay"];
+
+    const formatDate = (timestamp) => {
+        if (!timestamp) return "-";
+        const date = new Date(timestamp);
+        return date.toLocaleDateString("az-AZ", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
         });
     };
 
-    const reportData = [
-        {
-            planDate: "01.05.2024",
-            patient: "Elnur Quliyev",
-            toothNo: "12",
-            operation: "Implant",
-            plannerDoctor: "Dr. Murad",
-            price: "300 AZN",
-            discount: "50 AZN",
-            total: "250 AZN",
-            executionDate: "05.05.2024",
-            executorDoctor: "Dr. Aysel"
-        },
-        {
-            planDate: "02.05.2024",
-            patient: "Aysel Məmmədova",
-            toothNo: "24",
-            operation: "Diş Çəkimi",
-            plannerDoctor: "Dr. Cavid",
-            price: "80 AZN",
-            discount: "0 AZN",
-            total: "80 AZN",
-            executionDate: "04.05.2024",
-            executorDoctor: "Dr. Murad"
-        }
-    ];
-
-    const activeData = periodData[selectedPeriod] || periodData["bu_ay"];
+    const totalRawPrice = detailedLogs.reduce((sum, item) => sum + (item.price || 0), 0);
+    const totalDiscount = detailedLogs.reduce((sum, item) => sum + (item.discount || 0), 0);
+    const totalNetPrice = detailedLogs.reduce((sum, item) => sum + (item.finalPrice || 0), 0);
 
     // Helper to draw a custom SVG line chart path smoothly
     const renderLineChart = (chartData) => {
@@ -932,31 +971,54 @@ function ReportsPage() {
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-100 text-gray-600 font-medium">
-                                                {reportData.map((item, index) => (
+                                                {detailedLogs.map((item, index) => (
                                                     <tr key={index} className="hover:bg-gray-50/70 transition-all">
-                                                        <td className="p-3.5 text-center border-r border-[#CDD5DF] font-bold text-gray-900">{index + 1}</td>
-                                                        <td className="p-3.5">{item.planDate}</td>
-                                                        <td className="p-3.5 font-bold text-gray-900">{item.patient}</td>
-                                                        <td className="p-3.5 text-center font-bold text-purple-600">{item.toothNo}</td>
-                                                        <td className="p-3.5">{item.operation}</td>
-                                                        <td className="p-3.5">{item.plannerDoctor}</td>
-                                                        <td className="p-3.5 text-right font-semibold">{item.price}</td>
-                                                        <td className="p-3.5 text-right text-red-500 font-semibold">{item.discount}</td>
-                                                        <td className="p-3.5 text-right text-emerald-600 font-bold">{item.total}</td>
-                                                        <td className="p-3.5">{item.executionDate}</td>
-                                                        <td className="p-3.5">{item.executorDoctor}</td>
+                                                        <td className="p-3.5 text-center border-r border-[#CDD5DF] font-bold text-gray-900">{index + 1 + currentPage * 10}</td>
+                                                        <td className="p-3.5">{formatDate(item.planDate)}</td>
+                                                        <td className="p-3.5 font-bold text-gray-900">{item.patientName}</td>
+                                                        <td className="p-3.5 text-center font-bold text-purple-600">{item.teethNo || "-"}</td>
+                                                        <td className="p-3.5">{item.operationName}</td>
+                                                        <td className="p-3.5">{item.planningDoctorName}</td>
+                                                        <td className="p-3.5 text-right font-semibold">₼{item.price?.toLocaleString()}</td>
+                                                        <td className="p-3.5 text-right text-red-500 font-semibold">₼{item.discount?.toLocaleString()}</td>
+                                                        <td className="p-3.5 text-right text-emerald-600 font-bold">₼{item.finalPrice?.toLocaleString()}</td>
+                                                        <td className="p-3.5">{formatDate(item.executionDate)}</td>
+                                                        <td className="p-3.5">{item.executionDoctorName}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                         </table>
                                     </div>
 
+                                    {/* Pagination Controls */}
+                                    {totalPages > 1 && (
+                                        <div className="flex justify-between items-center p-4 border-t border-gray-100 bg-gray-50/50">
+                                            <button
+                                                disabled={currentPage === 0}
+                                                onClick={() => loadDetailedReports(currentPage - 1)}
+                                                className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-all"
+                                            >
+                                                Əvvəlki
+                                            </button>
+                                            <span className="text-xs text-gray-500 font-medium font-sans">
+                                                Səhifə {currentPage + 1} / {totalPages}
+                                            </span>
+                                            <button
+                                                disabled={currentPage >= totalPages - 1}
+                                                onClick={() => loadDetailedReports(currentPage + 1)}
+                                                className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-all"
+                                            >
+                                                Növbəti
+                                            </button>
+                                        </div>
+                                    )}
+
                                     {/* Summary row */}
                                     <div className="bg-gray-50 p-4 border-t border-gray-100 flex justify-end gap-12 text-xs font-bold text-gray-700">
                                         <p className="text-gray-500">Yekun Cəmlər:</p>
-                                        <p>Qiymət: <span className="text-gray-950 ml-1">380 AZN</span></p>
-                                        <p>Endirim: <span className="text-red-500 ml-1">50 AZN</span></p>
-                                        <p>Net Yekun: <span className="text-emerald-600 ml-1">330 AZN</span></p>
+                                        <p>Qiymət: <span className="text-gray-950 ml-1">₼{totalRawPrice.toLocaleString()}</span></p>
+                                        <p>Endirim: <span className="text-red-500 ml-1">₼{totalDiscount.toLocaleString()}</span></p>
+                                        <p>Net Yekun: <span className="text-emerald-600 ml-1">₼{totalNetPrice.toLocaleString()}</span></p>
                                     </div>
                                 </div>
                             </div>

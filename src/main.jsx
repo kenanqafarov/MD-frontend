@@ -21,6 +21,8 @@ import { AnimatePresence, motion } from "framer-motion";
 
 // stores
 import useAuthStore from "../stores/authStore";
+import usePermissionStore from "../stores/permissionStore";
+import { usePermission } from "./hooks/usePermission";
 
 // Components
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -580,16 +582,119 @@ const PageTransition = ({ children }) => {
   );
 };
 
+const routeModuleMap = {
+  // Employees
+  "/employees": { module: "Həkimlər", action: "READ" },
+  "/employees/employee-schedule": { module: "Həkimlərin iş qrafiki", action: "READ" },
+  "/employees/employee-add": { module: "Həkimlər", action: "CREATE" },
+  
+  // Appointments & Queue
+  "/appointments": { module: "Ümumi təqvim", action: "READ" },
+  "/queue": { module: "Növbə gözləyənlər", action: "READ" },
+  
+  // Patients
+  "/patients": { module: "Pasientlər", action: "READ" },
+  
+  // Reports
+  "/reports": { module: "Hesabat", action: "READ" },
+  "reports": { module: "Hesabat", action: "READ" },
+  
+  // Lab
+  "/sent-orders": { module: "Göndərilən sifarişlər", action: "READ" },
+  "/received-orders": { module: "Gələn sifarişlər", action: "READ" },
+  "/technicals-report": { module: "Texniklər üzrə hesabat", action: "READ" },
+  
+  // Stock
+  "/stock/clinic": { module: "Klinikanın stoku", action: "READ" },
+  "/stock/cabinet": { module: "Kabinet/Obyekt stoku", action: "READ" },
+  "/stock/import": { module: "Anbara maddəxil", action: "READ" },
+  "/stock/order": { module: "Anbara sifariş", action: "READ" },
+  "/stock/export": { module: "Anbardan maxaric", action: "READ" },
+  "/stock/entry": { module: "Anbardan daxilolmalar", action: "READ" },
+  "/stock/delete": { module: "Anbardan silinmə", action: "READ" },
+  "/stock/usage": { module: "Məhsul istifadəsi", action: "READ" },
+  
+  // Settings
+  "/permissions": { module: "İcazələr", action: "READ" },
+  "/technicians": { module: "Texniklər", action: "READ" },
+  "/appointment-types": { module: "Randevu tipləri", action: "READ" },
+  "/checklist": { module: "Müayinə siyahısı", action: "READ" },
+  "/operations": { module: "Əməliyyat növləri", action: "READ" },
+  "/colors": { module: "Rənglər", action: "READ" },
+  "/implants": { module: "İmplantlar", action: "READ" },
+  "/dental-set": { module: "Qarnirlar", action: "READ" },
+  "/insurance": { module: "Sığorta şirkətləri", action: "READ" },
+  "/price-category": { module: "Qiymət kateqoriyaları", action: "READ" },
+  "/cabinets": { module: "Kabinetlər", action: "READ" },
+  "/recepts": { module: "Reseptlər", action: "READ" },
+  "/anamnesis": { module: "Anamnez siyahısı", action: "READ" },
+  "/specialities": { module: "İxtisaslar", action: "READ" },
+  "/product-categories": { module: "Məhsul kateqoriyaları", action: "READ" },
+  "/blacklist-reasons": { module: "Qara siyahı səbəbləri", action: "READ" },
+  "/general-settings": { module: "Ümumi tənzimləmələr", action: "READ" },
+  "/metals": { module: "Digər", action: "READ" },
+  "/ceramics": { module: "Digər", action: "READ" },
+};
+
 // Test
 const AnimatedRoutes = () => {
   const loadTokenFromStorage = useAuthStore(
     (state) => state.loadTokenFromStorage
   );
+  const token = useAuthStore((state) => state.token);
+  const fetchPermissions = usePermissionStore(
+    (state) => state.fetchPermissions
+  );
+  const { hasPermission } = usePermission();
   const location = useLocation();
 
   useEffect(() => {
     loadTokenFromStorage();
   }, [loadTokenFromStorage]);
+
+  useEffect(() => {
+    if (token) {
+      fetchPermissions();
+    }
+  }, [token, fetchPermissions]);
+
+  const isPathAllowed = (pathname) => {
+    if (pathname === "/login" || pathname === "/") return true;
+    
+    let mapInfo = routeModuleMap[pathname];
+    
+    if (!mapInfo) {
+      const keys = Object.keys(routeModuleMap).sort((a, b) => b.length - a.length);
+      const matchingKey = keys.find(key => pathname.startsWith(key));
+      if (matchingKey) {
+        mapInfo = routeModuleMap[matchingKey];
+      }
+    }
+    
+    if (!mapInfo) return true;
+    
+    return hasPermission(mapInfo.module, mapInfo.action);
+  };
+
+  const allowed = isPathAllowed(location.pathname);
+
+  if (!allowed && token) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100vh", background: "#EEF2F6", fontFamily: "sans-serif" }}>
+        <div style={{ padding: "32px", background: "white", borderRadius: "8px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)", textAlign: "center", maxWidth: "400px", border: "1px solid #E2E8F0" }}>
+          <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#EF4444", marginBottom: "16px" }}>Giriş Qadağandır</h1>
+          <p style={{ color: "#4A5568", marginBottom: "24px" }}>Bu səhifəyə daxil olmaq üçün kifayət qədər icazəniz yoxdur.</p>
+          <button 
+            onClick={() => window.location.href = "/"}
+            style={{ padding: "8px 24px", background: "#3182CE", color: "white", borderRadius: "4px", border: "none", cursor: "pointer", fontSize: "16px", fontWeight: "600" }}
+          >
+            Ana səhifəyə qayıt
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AnimatePresence mode="wait" initial={false}>
       <div className="app-wrapper" key={location.pathname}>

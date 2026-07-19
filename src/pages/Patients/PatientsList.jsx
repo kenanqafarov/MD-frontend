@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { HiArrowsUpDown } from "react-icons/hi2";
 import axios from "axios";
+import { usePermission } from "../../hooks/usePermission";
 
 // Icons
 import { CiSearch, CiCircleInfo } from "react-icons/ci";
@@ -25,7 +26,7 @@ const initialSearch = {
 };
 
 // Memoized table row component
-const PatientRow = React.memo(({ item, onInfoClick, onDeleteClick }) => {
+const PatientRow = React.memo(({ item, onInfoClick, onDeleteClick, canDelete }) => {
   return (
     <tr>
       <td>{item.id}</td>
@@ -43,19 +44,25 @@ const PatientRow = React.memo(({ item, onInfoClick, onDeleteClick }) => {
             className="icon info"
             onClick={() => onInfoClick(item)}
           />
-          <GoTrash
-            className="icon delete"
-            onClick={() => onDeleteClick(item)}
-          />
+          {canDelete && (
+            <GoTrash
+              className="icon delete"
+              onClick={() => onDeleteClick(item)}
+            />
+          )}
         </div>
       </td>
     </tr>
   );
-}, (prevProps, nextProps) => prevProps.item.id === nextProps.item.id);
+}, (prevProps, nextProps) => prevProps.item.id === nextProps.item.id && prevProps.canDelete === nextProps.canDelete);
 
 PatientRow.displayName = 'PatientRow';
 
 function PatientsList() {
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Pasientlər", "CREATE");
+  const canDelete = hasPermission("Pasientlər", "DELETE");
+
   const [data, setData] = useState([]);
   const [search, setSearch] = useState(initialSearch);
   const [currentPage, setCurrentPage] = useState(1);
@@ -198,6 +205,7 @@ function PatientsList() {
           addText="Yenisini əlavə et"
           addLink="/patients/add-patient"
           exportLink="/patients/export"
+          showAdd={canCreate}
         />
         <div className="patientsListSearch ml-1">
           <div className="leftPart">
@@ -304,6 +312,7 @@ function PatientsList() {
                   item={item}
                   onInfoClick={handleInfoClick}
                   onDeleteClick={handleDeleteClick}
+                  canDelete={canDelete}
                 />
               ))}
             </tbody>
