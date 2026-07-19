@@ -8,9 +8,15 @@ import "../../assets/style/EmployeesPage/employeespage.css";
 import useEmployeeStore from "../../../stores/workerStore";
 import { useNavigate, Link } from "react-router-dom";
 import { useDebounce } from "../../hooks/useDebounce";
+import { usePermission } from "../../hooks/usePermission";
 import "./EmployeList.css";
 
 const EmployeesList = () => {
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Həkimlər", "CREATE");
+  const canUpdate = hasPermission("Həkimlər", "UPDATE");
+  const canDelete = hasPermission("Həkimlər", "DELETE");
+
   // Zustand selector optimization - sadece ihtiyaç duyulan state'leri al
   const workers = useEmployeeStore(state => state.workers);
   const searchResult = useEmployeeStore(state => state.searchResult);
@@ -163,23 +169,30 @@ const EmployeesList = () => {
     }
   }, [removeWorker, searchParams, fetchWorkers, setSearchResult, handleSearch]);
 
-  const icons = useMemo(() => [
-    {
-      icon: CiCircleInfo,
-      action: handleInfoClick,
-      className: "info",
-    },
-    {
-      icon: FiEdit3,
-      action: handleEditClick,
-      className: "edit",
-    },
-    {
-      icon: GoTrash,
-      action: handleDeleteClick,
-      className: "delete",
-    },
-  ], [handleInfoClick, handleEditClick, handleDeleteClick]);
+  const icons = useMemo(() => {
+    const list = [
+      {
+        icon: CiCircleInfo,
+        action: handleInfoClick,
+        className: "info",
+      }
+    ];
+    if (canUpdate) {
+      list.push({
+        icon: FiEdit3,
+        action: handleEditClick,
+        className: "edit",
+      });
+    }
+    if (canDelete) {
+      list.push({
+        icon: GoTrash,
+        action: handleDeleteClick,
+        className: "delete",
+      });
+    }
+    return list;
+  }, [handleInfoClick, handleEditClick, handleDeleteClick, canUpdate, canDelete]);
 
   // Memoized pagination
   const totalPages = useMemo(() => {
@@ -213,6 +226,7 @@ const EmployeesList = () => {
         addText="Yenisini əlavə et"
         addLink="/employees/employee-add"
         exportLink="/employees/export"
+        showAdd={canCreate}
       />
 
       <div className="patientsListSearch">

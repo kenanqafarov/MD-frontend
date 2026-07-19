@@ -9,14 +9,16 @@ import { FiDownload } from "react-icons/fi";
 
 import { Link } from 'react-router-dom';
 
-function OrdinaryListHeader({ title, addText, addLink, exportLink, onAddClick }) {
+function OrdinaryListHeader({ title, addText, addLink, exportLink, onAddClick, showAdd = true }) {
   return (
     <div className="listHeader -ml-4">
       <p className='titleOrdinaryList'>{title}</p>
       <div className="ordinaryListButtons">
-        <Link onClick={onAddClick} to={addLink} className='addTextBTN'>
-          <IoPersonAddOutline className='addBTN' /> {addText}
-        </Link>
+        {showAdd && (
+          <Link onClick={onAddClick} to={addLink} className='addTextBTN'>
+            <IoPersonAddOutline className='addBTN' /> {addText}
+          </Link>
+        )}
         <Link target='_blank' className='exportDataNow' to={exportLink}>
           <FiDownload className='exportDataBTN' />
         </Link>

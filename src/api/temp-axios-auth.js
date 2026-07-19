@@ -1,7 +1,12 @@
 import axios from "axios";
 import useAuthStore from "../../stores/authStore";
 
-const API_BASE_URL = import.meta.env.VITE_BASE_URL || "/api/v1";
+let API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_BASE_URL;
+
+if (API_BASE_URL === undefined || API_BASE_URL === "undefined" || !API_BASE_URL) {
+  console.warn("⚠️ Environment variables VITE_API_URL and VITE_BASE_URL are not defined. Falling back to '/api/v1'.");
+  API_BASE_URL = "/api/v1";
+}
 
 // Helper function to check if token is expired
 function isTokenExpired(token) {
@@ -114,8 +119,11 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // If error is 401 and we haven't tried to refresh yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // If error is 401, token is expired, and we haven't tried to refresh yet
+    const token = localStorage.getItem("token");
+    const tokenExpired = token ? isTokenExpired(token) : true;
+
+    if (error.response?.status === 401 && !originalRequest._retry && tokenExpired) {
       if (isRefreshing) {
         // If refresh is already in progress, queue this request
         return new Promise((resolve, reject) => {

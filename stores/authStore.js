@@ -4,6 +4,7 @@ import {
   refreshToken as refreshTokenApi,
 } from "../src/api/login";
 import { readPatients } from "../src/api/patient";
+import { getWorkerInfo } from "../src/api/add-worker";
 
 // Token decode helper (JWT içindən userId və ya username çıxartmaq üçün)
 function parseJwt(token) {
@@ -53,9 +54,20 @@ const useAuthStore = create((set) => ({
           localStorage.setItem("userId", userId);
         }
 
+        let userData = { id: userId, username: decoded?.username || username };
+        try {
+          if (userId) {
+            const workerInfo = await getWorkerInfo(userId);
+            userData = { ...userData, ...workerInfo };
+            localStorage.setItem("user", JSON.stringify(userData));
+          }
+        } catch (err) {
+          console.error("Failed to fetch user info during login:", err);
+        }
+
         set({
           token,
-          user: { id: userId, username: decoded?.username || username },
+          user: userData,
           loading: false,
         });
 
@@ -90,6 +102,7 @@ const useAuthStore = create((set) => ({
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("userId");
+    localStorage.removeItem("user");
     // Patients cache-i sil
     localStorage.removeItem("patients_cache");
     localStorage.removeItem("patients_cache_timestamp");
@@ -102,11 +115,24 @@ const useAuthStore = create((set) => ({
     set({ user: null, token: null });
   },
 
-  loadTokenFromStorage: () => {
+  loadTokenFromStorage: async () => {
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("userId");
+    const cachedUser = localStorage.getItem("user");
     if (token) {
-      set({ token, user: { id: userId } });
+      let userData = cachedUser ? JSON.parse(cachedUser) : { id: userId };
+      set({ token, user: userData });
+
+      if (userId) {
+        try {
+          const workerInfo = await getWorkerInfo(userId);
+          userData = { ...userData, ...workerInfo };
+          localStorage.setItem("user", JSON.stringify(userData));
+          set({ user: userData });
+        } catch (err) {
+          console.error("Failed to fetch fresh user info on storage load:", err);
+        }
+      }
     }
   },
 

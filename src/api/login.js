@@ -1,6 +1,10 @@
 import axios from "axios";
-const API_BASE_URL =
-  import.meta.env.VITE_BASE_URL;
+let API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_BASE_URL;
+
+if (API_BASE_URL === undefined || API_BASE_URL === "undefined" || !API_BASE_URL) {
+  console.warn("⚠️ Environment variables VITE_API_URL and VITE_BASE_URL are not defined in login.js. Falling back to '/api/v1'.");
+  API_BASE_URL = "/api/v1";
+}
 
 export const login = async ({ username, password }) => {
   try {
