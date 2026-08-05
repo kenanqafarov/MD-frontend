@@ -34,7 +34,13 @@ function EmployeeEdit() {
       toast.success("İstifadəçi uğurla yeniləndi");
       navigate(-1);
     } catch (err) {
-      toast.error("İstifadəçini yeniləmək alınmadı");
+      const serverMessage = err?.response?.data?.message || err?.response?.data || err?.message;
+      if (serverMessage && typeof serverMessage === 'string') {
+        toast.error(serverMessage);
+      } else {
+        toast.error("İstifadəçini yeniləmək alınmadı");
+      }
+      throw err;
     } finally {
       setIsProcessing(false);
     }

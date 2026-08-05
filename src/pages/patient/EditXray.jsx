@@ -6,6 +6,7 @@ import { MdDeleteForever } from "react-icons/md";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import usePatientXrayStore from "../../../stores/patient-xrayStore";
+import { uploadToCloudinary } from "../../utils/cloudinary";
 
 const EditXray = () => {
     const { id } = useParams();
@@ -45,14 +46,17 @@ const EditXray = () => {
         }));
     };
 
-    const handleNewImageUpload = (e) => {
+    const handleNewImageUpload = async (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (newImagePreview) {
-                URL.revokeObjectURL(newImagePreview);
+            try {
+                const cloudinaryUrl = await uploadToCloudinary(file);
+                setNewImage(file);
+                setNewImagePreview(cloudinaryUrl);
+                setXrayData(prev => ({ ...prev, url: cloudinaryUrl }));
+            } catch (err) {
+                console.error("Xray Cloudinary upload failed:", err);
             }
-            setNewImage(file);
-            setNewImagePreview(URL.createObjectURL(file));
         }
         e.target.value = null;
     };

@@ -21,11 +21,10 @@ function Redirecter({ children }) {
     const goToLogin = () => {
       clearCountdown();
       const location = window.location;
-      // HashRouter kullanıldığında hash'ten path'i al
       const currentPath = location.hash ? location.hash.replace('#', '') : location.pathname;
       
-      // Orijinal route'u sakla (login sonrası geri dönmek için)
-      if (currentPath && currentPath !== '/login' && !currentPath.startsWith('/login')) {
+      // Orijinal route'u sakla (login sonrası geri dönmək üçün)
+      if (currentPath && currentPath !== '/login' && !currentPath.startsWith('/login') && currentPath !== '/') {
         sessionStorage.setItem('redirectAfterLogin', currentPath);
       }
       
@@ -33,7 +32,9 @@ function Redirecter({ children }) {
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("userId");
       
-      // HashRouter kullanıldığında hash'i temizleyerek login'e git
+      if (window.location.hash) {
+        window.history.replaceState(null, "", window.location.pathname);
+      }
       navigate("/login", { replace: true });
     };
 
@@ -95,6 +96,13 @@ function Redirecter({ children }) {
     };
 
     const checkAndRefreshToken = async () => {
+      if (window.location.pathname === "/login") {
+        if (window.location.hash) {
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+        return;
+      }
+
       const token = localStorage.getItem("token");
       const refreshToken = localStorage.getItem("refreshToken");
       const user = localStorage.getItem("userId");

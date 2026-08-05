@@ -168,7 +168,7 @@ function StockExportList() {
           <tbody>
             {tableData.length > 0 ? (
               tableData.map((row) => (
-                <tr key={row.id}>
+                <tr key={row.id} onClick={() => handleInfoClick(row)} style={{ cursor: "pointer" }}>
                   <td>{row.id}</td>
                   <td>{row.date}</td>
                   <td>{row.time}</td>
@@ -182,6 +182,7 @@ function StockExportList() {
                     <Link
                       className="stockExportCheckIconContainer"
                       to={`/stock/export/${row.id}`}
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <FiShoppingBag className="stockExportCheckIcon" />
                     </Link>
@@ -190,7 +191,10 @@ function StockExportList() {
                     <div className="icons flex gap-3 cursor-pointer">
                       <CiCircleInfo
                         className="info"
-                        onClick={() => handleInfoClick(row)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleInfoClick(row);
+                        }}
                       />
                     </div>
                   </td>

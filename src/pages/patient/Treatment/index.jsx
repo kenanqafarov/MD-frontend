@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import "@ant-design/v5-patch-for-react-19"; // React 19 uyumluluğu için gerekli
 import 'antd/dist/reset.css';
 import { Select, Space, Divider, Card, Button, Form, message, Drawer, Spin } from 'antd';
@@ -15,6 +15,7 @@ import useTreatmentStore from '../../../../stores/treatmentStore';
 
 const Plans = () => {     
   const { id: patientId } = useParams();
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -857,7 +858,7 @@ const Plans = () => {
 
                       // Hesabat səhifəsinə avtomatik keç
                       try {
-                        window.location.hash = `#/patients/patient/${patientId}/report`;
+                        navigate(`/patients/patient/${patientId}/report`);
                       } catch (_) {}
 
                       // Patient plans datayı yenilə

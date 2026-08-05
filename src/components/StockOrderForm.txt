@@ -13,7 +13,7 @@ import axios from "axios"
 import useOrdersFromWarehouseStore from "../../stores/orderFromWarehouseStore"
 import useCabinetStore from "../../stores/cabinetStore"
 
-const API_BASE_URL = "http://localhost:5555/api/v1/"
+const API_BASE_URL = "http://83.171.249.199:5555/api/v1/"
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

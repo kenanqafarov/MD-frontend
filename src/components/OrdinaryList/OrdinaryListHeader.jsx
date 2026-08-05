@@ -15,9 +15,15 @@ function OrdinaryListHeader({ title, addText, addLink, exportLink, onAddClick, s
       <p className='titleOrdinaryList'>{title}</p>
       <div className="ordinaryListButtons">
         {showAdd && (
-          <Link onClick={onAddClick} to={addLink} className='addTextBTN'>
-            <IoPersonAddOutline className='addBTN' /> {addText}
-          </Link>
+          onAddClick ? (
+            <button type="button" onClick={onAddClick} className='addTextBTN'>
+              <IoPersonAddOutline className='addBTN' /> {addText}
+            </button>
+          ) : (
+            <Link to={addLink || "#"} className='addTextBTN'>
+              <IoPersonAddOutline className='addBTN' /> {addText}
+            </Link>
+          )
         )}
         <Link target='_blank' className='exportDataNow' to={exportLink}>
           <FiDownload className='exportDataBTN' />

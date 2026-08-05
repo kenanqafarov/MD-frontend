@@ -13,10 +13,10 @@ const Layout = () => {
     setIsCollapsed(!isCollapsed);
   };
 
-  // Main content üçün dinamik Tailwind sinifləri
-  const mainContentClasses = `flex flex-col flex-1 ${
-    isCollapsed ? "ml-[84px]" : "ml-[254px]"
-  } transition-all duration-300`;
+  const mainContentStyle = {
+    marginLeft: isCollapsed ? "84px" : "254px",
+    width: isCollapsed ? "calc(100% - 84px)" : "calc(100% - 254px)",
+  };
 
   return (
     <div className="flex w-full min-h-screen">
@@ -24,7 +24,7 @@ const Layout = () => {
         <SidebarMenu isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
       </div>
 
-      <div className={mainContentClasses}>
+      <div className="flex flex-col flex-1 transition-all duration-300" style={mainContentStyle}>
         <Header />
         <Breadcrumb />
         <main className="p-4 w-full">

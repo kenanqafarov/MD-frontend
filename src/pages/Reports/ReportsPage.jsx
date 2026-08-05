@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { fetchDashboardReports, fetchDetailedReports } from "../../api/reports";
+import { fetchDashboardReports, fetchDetailedReports, exportDetailedReports, exportPaymentsReports } from "../../api/reports";
+import { toast } from "react-toastify";
 import { HiArrowsUpDown } from "react-icons/hi2";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -172,14 +173,15 @@ function ReportsPage() {
     const [executorDoctor, setExecutorDoctor] = useState(null);
     const [category, setCategory] = useState(null);
     const [operation, setOperation] = useState(null);
-    const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
 
     // Backend states
     const [dashboardData, setDashboardData] = useState(null);
     const [detailedLogs, setDetailedLogs] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [totalRawPrice, setTotalRawPrice] = useState(0);
+    const [totalDiscount, setTotalDiscount] = useState(0);
+    const [totalNetPrice, setTotalNetPrice] = useState(0);
 
     // Fetch doctors and options on mount
     useEffect(() => {
@@ -223,12 +225,16 @@ function ReportsPage() {
     const loadDetailedReports = async (page = 0) => {
         setIsLoading(true);
         try {
+            const selectedCategoryObj = categories.find(c => String(c.id) === String(category));
+            const categoryName = selectedCategoryObj ? selectedCategoryObj.name : (category || undefined);
+
             const criteria = {
                 plannerDoctor: plannerDoctor || undefined,
                 executorDoctor: executorDoctor || undefined,
+                category: categoryName,
                 operationName: operation || undefined,
-                startDate: startDate ? new Date(startDate).getTime() : undefined,
-                endDate: endDate ? new Date(endDate).getTime() : undefined,
+                startDate: fromDate ? new Date(fromDate).getTime() : undefined,
+                endDate: toDate ? new Date(toDate).getTime() : undefined,
             };
 
             const response = await fetchDetailedReports({
@@ -239,8 +245,57 @@ function ReportsPage() {
             setDetailedLogs(response.content || []);
             setCurrentPage(response.number || 0);
             setTotalPages(response.totalPages || 0);
+            setTotalRawPrice(response.totalRawPrice || 0);
+            setTotalDiscount(response.totalDiscount || 0);
+            setTotalNetPrice(response.totalNetPrice || 0);
         } catch (error) {
             console.error("Failed to load detailed reports:", error);
+            toast.error("Ətraflı hesabat məlumatları yüklənərkən xəta baş verdi.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleExportExcel = async () => {
+        setIsLoading(true);
+        try {
+            let blobData;
+            let fileName = "maliyyə_hesabatı.xlsx";
+
+            if (activeTab === "detailed") {
+                const selectedCategoryObj = categories.find(c => String(c.id) === String(category));
+                const categoryName = selectedCategoryObj ? selectedCategoryObj.name : (category || undefined);
+
+                const criteria = {
+                    plannerDoctor: plannerDoctor || undefined,
+                    executorDoctor: executorDoctor || undefined,
+                    category: categoryName,
+                    operationName: operation || undefined,
+                    startDate: fromDate ? new Date(fromDate).getTime() : undefined,
+                    endDate: toDate ? new Date(toDate).getTime() : undefined,
+                };
+                blobData = await exportDetailedReports(criteria);
+                fileName = "etraflı_log_hesabatı.xlsx";
+            } else {
+                blobData = await exportPaymentsReports({
+                    period: selectedPeriod,
+                    fromDate,
+                    toDate
+                });
+                fileName = `maliyya_hesabati_${selectedPeriod}.xlsx`;
+            }
+
+            const url = window.URL.createObjectURL(new Blob([blobData]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            toast.success("Excel faylı uğurla yükləndi!");
+        } catch (err) {
+            console.error("Excel export failed:", err);
+            toast.error("Excel faylını yükləyərkən xəta baş verdi.");
         } finally {
             setIsLoading(false);
         }
@@ -254,6 +309,18 @@ function ReportsPage() {
             loadDashboard();
         }
     }, [activeTab, selectedPeriod, fromDate, toDate]);
+
+    // Real-time synchronization polling every 30 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (activeTab === 'detailed') {
+                loadDetailedReports(currentPage);
+            } else {
+                loadDashboard();
+            }
+        }, 30000);
+        return () => clearInterval(interval);
+    }, [activeTab, selectedPeriod, fromDate, toDate, currentPage]);
 
     const handlePeriodChange = (val) => {
         setSelectedPeriod(val);
@@ -271,7 +338,36 @@ function ReportsPage() {
         loadDetailedReports(0);
     };
 
-    const activeData = dashboardData || periodData[selectedPeriod] || periodData["bu_ay"];
+    const defaultDashboardData = {
+        cashCollected: 0,
+        patientCredit: 0,
+        production: 0,
+        avgTicket: 0,
+        paymentsCount: 0,
+        treatmentsCount: 0,
+        totalInvoiced: 0,
+        outstandingBalance: 0,
+        overdueInvoicesCount: 0,
+        collectionsTotal: 0,
+        newPatients: 0,
+        noShowRate: 0,
+        agingReceivables: 0,
+        agingReceivables030: 0,
+        agingPatients030: 0,
+        agingReceivables3160: 0,
+        agingPatients3160: 0,
+        agingReceivables6190: 0,
+        agingPatients6190: 0,
+        agingReceivables90Plus: 0,
+        agingPatients90Plus: 0,
+        collectionsChart: [],
+        doctorsProduction: [],
+        paymentsMethod: [],
+        overdueInvoices: [],
+        professionals: []
+    };
+
+    const activeData = dashboardData || periodData[selectedPeriod] || defaultDashboardData;
 
     const formatDate = (timestamp) => {
         if (!timestamp) return "-";
@@ -282,10 +378,6 @@ function ReportsPage() {
             year: "numeric"
         });
     };
-
-    const totalRawPrice = detailedLogs.reduce((sum, item) => sum + (item.price || 0), 0);
-    const totalDiscount = detailedLogs.reduce((sum, item) => sum + (item.discount || 0), 0);
-    const totalNetPrice = detailedLogs.reduce((sum, item) => sum + (item.finalPrice || 0), 0);
 
     // Helper to draw a custom SVG line chart path smoothly
     const renderLineChart = (chartData) => {
@@ -396,6 +488,12 @@ function ReportsPage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleExportExcel}
+                        className="flex items-center gap-1.5 px-4 py-2 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-sm font-semibold shadow-sm transition-all"
+                    >
+                        <FiDownload className="text-emerald-600" /> Excel Export
+                    </button>
                     <Link
                         to="/"
                         className="flex items-center gap-1.5 px-4 py-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold shadow-sm transition-all"
@@ -443,7 +541,7 @@ function ReportsPage() {
             </div>
 
             {/* Period Filter for Dashboard Views */}
-            {activeTab !== 'detailed' && (
+            {true && (
                 <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-wrap items-center justify-between gap-4 mb-6">
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="w-48">
@@ -668,37 +766,37 @@ function ReportsPage() {
                                             <div className="flex items-center justify-between gap-4 text-xs font-medium">
                                                 <span className="w-20 text-gray-500">0 - 30 days</span>
                                                 <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                                    <div className="bg-emerald-500 h-full rounded-full" style={{ width: activeData.agingReceivables > 0 ? "100%" : "0%" }} />
+                                                    <div className="bg-emerald-500 h-full rounded-full" style={{ width: activeData.agingReceivables > 0 ? `${((activeData.agingReceivables030 || 0) / activeData.agingReceivables) * 100}%` : "0%" }} />
                                                 </div>
-                                                <span className="text-gray-400 text-[10px] w-16 text-center">{activeData.agingReceivables > 0 ? "6 patients" : "0 patients"}</span>
-                                                <span className="text-gray-900 font-bold w-16 text-right">₼{activeData.agingReceivables.toLocaleString()}</span>
+                                                <span className="text-gray-400 text-[10px] w-16 text-center">{(activeData.agingPatients030 || 0)} patients</span>
+                                                <span className="text-gray-900 font-bold w-16 text-right">₼{(activeData.agingReceivables030 || 0).toLocaleString()}</span>
                                             </div>
                                             {/* 31-60 Days */}
                                             <div className="flex items-center justify-between gap-4 text-xs font-medium">
                                                 <span className="w-20 text-gray-500">31 - 60 days</span>
                                                 <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                                    <div className="bg-gray-200 h-full rounded-full" style={{ width: "0%" }} />
+                                                    <div className="bg-blue-500 h-full rounded-full" style={{ width: activeData.agingReceivables > 0 ? `${((activeData.agingReceivables3160 || 0) / activeData.agingReceivables) * 100}%` : "0%" }} />
                                                 </div>
-                                                <span className="text-gray-400 text-[10px] w-16 text-center">0 patients</span>
-                                                <span className="text-gray-900 font-bold w-16 text-right">₼0.00</span>
+                                                <span className="text-gray-400 text-[10px] w-16 text-center">{(activeData.agingPatients3160 || 0)} patients</span>
+                                                <span className="text-gray-900 font-bold w-16 text-right">₼{(activeData.agingReceivables3160 || 0).toLocaleString()}</span>
                                             </div>
                                             {/* 61-90 Days */}
                                             <div className="flex items-center justify-between gap-4 text-xs font-medium">
                                                 <span className="w-20 text-gray-500">61 - 90 days</span>
                                                 <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                                    <div className="bg-gray-200 h-full rounded-full" style={{ width: "0%" }} />
+                                                    <div className="bg-amber-500 h-full rounded-full" style={{ width: activeData.agingReceivables > 0 ? `${((activeData.agingReceivables6190 || 0) / activeData.agingReceivables) * 100}%` : "0%" }} />
                                                 </div>
-                                                <span className="text-gray-400 text-[10px] w-16 text-center">0 patients</span>
-                                                <span className="text-gray-900 font-bold w-16 text-right">₼0.00</span>
+                                                <span className="text-gray-400 text-[10px] w-16 text-center">{(activeData.agingPatients6190 || 0)} patients</span>
+                                                <span className="text-gray-900 font-bold w-16 text-right">₼{(activeData.agingReceivables6190 || 0).toLocaleString()}</span>
                                             </div>
                                             {/* 90+ Days */}
                                             <div className="flex items-center justify-between gap-4 text-xs font-medium">
                                                 <span className="w-20 text-gray-500">90+ days</span>
                                                 <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                                    <div className="bg-gray-200 h-full rounded-full" style={{ width: "0%" }} />
+                                                    <div className="bg-red-500 h-full rounded-full" style={{ width: activeData.agingReceivables > 0 ? `${((activeData.agingReceivables90Plus || 0) / activeData.agingReceivables) * 100}%` : "0%" }} />
                                                 </div>
-                                                <span className="text-gray-400 text-[10px] w-16 text-center">0 patients</span>
-                                                <span className="text-gray-900 font-bold w-16 text-right">₼0.00</span>
+                                                <span className="text-gray-400 text-[10px] w-16 text-center">{(activeData.agingPatients90Plus || 0)} patients</span>
+                                                <span className="text-gray-900 font-bold w-16 text-right">₼{(activeData.agingReceivables90Plus || 0).toLocaleString()}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -901,9 +999,9 @@ function ReportsPage() {
                                         <div>
                                             <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tarix baş.</label>
                                             <input
-                                                value={startDate || ''}
+                                                value={fromDate || ''}
                                                 type="date"
-                                                onChange={(e) => setStartDate(e.target.value)}
+                                                onChange={(e) => setFromDate(e.target.value)}
                                                 placeholder="Tarix baş."
                                                 className="w-full text-xs border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-1 focus:ring-purple-500 bg-white"
                                             />
@@ -911,9 +1009,9 @@ function ReportsPage() {
                                         <div>
                                             <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tarix bit.</label>
                                             <input
-                                                value={endDate || ''}
+                                                value={toDate || ''}
                                                 type="date"
-                                                onChange={(e) => setEndDate(e.target.value)}
+                                                onChange={(e) => setToDate(e.target.value)}
                                                 placeholder="Tarix bit."
                                                 className="w-full text-xs border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-1 focus:ring-purple-500 bg-white"
                                             />
@@ -927,8 +1025,10 @@ function ReportsPage() {
                                                 setExecutorDoctor(null);
                                                 setCategory(null);
                                                 setOperation(null);
-                                                setStartDate(null);
-                                                setEndDate(null);
+                                                const d = new Date();
+                                                d.setDate(d.getDate() - 30);
+                                                setFromDate(d.toISOString().split('T')[0]);
+                                                setToDate(new Date().toISOString().split('T')[0]);
                                             }}
                                             className="px-4 py-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-xl transition-all"
                                         >
@@ -971,21 +1071,29 @@ function ReportsPage() {
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-100 text-gray-600 font-medium">
-                                                {detailedLogs.map((item, index) => (
-                                                    <tr key={index} className="hover:bg-gray-50/70 transition-all">
-                                                        <td className="p-3.5 text-center border-r border-[#CDD5DF] font-bold text-gray-900">{index + 1 + currentPage * 10}</td>
-                                                        <td className="p-3.5">{formatDate(item.planDate)}</td>
-                                                        <td className="p-3.5 font-bold text-gray-900">{item.patientName}</td>
-                                                        <td className="p-3.5 text-center font-bold text-purple-600">{item.teethNo || "-"}</td>
-                                                        <td className="p-3.5">{item.operationName}</td>
-                                                        <td className="p-3.5">{item.planningDoctorName}</td>
-                                                        <td className="p-3.5 text-right font-semibold">₼{item.price?.toLocaleString()}</td>
-                                                        <td className="p-3.5 text-right text-red-500 font-semibold">₼{item.discount?.toLocaleString()}</td>
-                                                        <td className="p-3.5 text-right text-emerald-600 font-bold">₼{item.finalPrice?.toLocaleString()}</td>
-                                                        <td className="p-3.5">{formatDate(item.executionDate)}</td>
-                                                        <td className="p-3.5">{item.executionDoctorName}</td>
+                                                {detailedLogs.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="11" className="p-8 text-center text-gray-400 font-semibold">
+                                                            Məlumat tapılmadı
+                                                        </td>
                                                     </tr>
-                                                ))}
+                                                ) : (
+                                                    detailedLogs.map((item, index) => (
+                                                        <tr key={index} className="hover:bg-gray-50/70 transition-all">
+                                                            <td className="p-3.5 text-center border-r border-[#CDD5DF] font-bold text-gray-900">{index + 1 + currentPage * 10}</td>
+                                                            <td className="p-3.5">{formatDate(item.planDate)}</td>
+                                                            <td className="p-3.5 font-bold text-gray-900">{item.patientName}</td>
+                                                            <td className="p-3.5 text-center font-bold text-purple-600">{item.teethNo || "-"}</td>
+                                                            <td className="p-3.5">{item.operationName}</td>
+                                                            <td className="p-3.5">{item.planningDoctorName}</td>
+                                                            <td className="p-3.5 text-right font-semibold">₼{item.price ? Number(item.price).toLocaleString('en-US', { minimumFractionDigits: 2 }) : "0.00"}</td>
+                                                            <td className="p-3.5 text-right text-red-500 font-semibold">₼{item.discount ? Number(item.discount).toLocaleString('en-US', { minimumFractionDigits: 2 }) : "0.00"}</td>
+                                                            <td className="p-3.5 text-right text-emerald-600 font-bold">₼{item.finalPrice ? Number(item.finalPrice).toLocaleString('en-US', { minimumFractionDigits: 2 }) : "0.00"}</td>
+                                                            <td className="p-3.5">{formatDate(item.executionDate)}</td>
+                                                            <td className="p-3.5">{item.executionDoctorName}</td>
+                                                        </tr>
+                                                    ))
+                                                )}
                                             </tbody>
                                         </table>
                                     </div>
@@ -1014,12 +1122,19 @@ function ReportsPage() {
                                     )}
 
                                     {/* Summary row */}
-                                    <div className="bg-gray-50 p-4 border-t border-gray-100 flex justify-end gap-12 text-xs font-bold text-gray-700">
-                                        <p className="text-gray-500">Yekun Cəmlər:</p>
-                                        <p>Qiymət: <span className="text-gray-950 ml-1">₼{totalRawPrice.toLocaleString()}</span></p>
-                                        <p>Endirim: <span className="text-red-500 ml-1">₼{totalDiscount.toLocaleString()}</span></p>
-                                        <p>Net Yekun: <span className="text-emerald-600 ml-1">₼{totalNetPrice.toLocaleString()}</span></p>
-                                    </div>
+                                    {(() => {
+                                        const computedTotalRaw = (totalRawPrice && totalRawPrice > 0) ? totalRawPrice : detailedLogs.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+                                        const computedTotalDiscount = (totalDiscount && totalDiscount > 0) ? totalDiscount : detailedLogs.reduce((sum, item) => sum + (Number(item.discount) || 0), 0);
+                                        const computedTotalNet = (totalNetPrice && totalNetPrice > 0) ? totalNetPrice : detailedLogs.reduce((sum, item) => sum + (Number(item.finalPrice) || 0), 0);
+                                        return (
+                                            <div className="bg-gray-50 p-4 border-t border-gray-100 flex justify-end gap-12 text-xs font-bold text-gray-700">
+                                                <p className="text-gray-500">Yekun Cəmlər:</p>
+                                                <p>Qiymət: <span className="text-gray-950 ml-1">₼{computedTotalRaw.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></p>
+                                                <p>Endirim: <span className="text-red-500 ml-1">₼{computedTotalDiscount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></p>
+                                                <p>Net Yekun: <span className="text-emerald-600 ml-1">₼{computedTotalNet.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></p>
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             </div>
                         )}

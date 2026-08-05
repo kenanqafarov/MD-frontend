@@ -64,6 +64,8 @@ function EditTechnician({ technicianId }) {
         ...prev,
         genderStatus: value === "male" ? "MAN" : "WOMAN",
       }));
+    } else if (name === "finCode") {
+      setFormData((prev) => ({ ...prev, [name]: value.toUpperCase().slice(0, 7) }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -115,6 +117,7 @@ function EditTechnician({ technicianId }) {
               <p className="editPartInputTitle">{label}</p>
               <input
                 type={type}
+                maxLength={name === "finCode" ? 7 : undefined}
                 className="editTechnicianInput"
                 name={name}
                 value={formData[name]}

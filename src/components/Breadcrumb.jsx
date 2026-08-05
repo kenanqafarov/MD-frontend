@@ -22,18 +22,21 @@ const Breadcrumb = () => {
             const context = segments[index - 1];
             switch (context) {
               case 'patient':
-                return 'Xəstə #' + segment;
+                return 'Xəstə #' + (segment.length > 8 ? segment.slice(0, 8) : segment);
               case 'user':
               case 'employee':
-                return 'İşçi #' + segment;
+              case 'employees':
+                return 'İşçi #' + (segment.length > 8 ? segment.slice(0, 8) : segment);
               case 'stock':
-                return 'Anbar #' + segment;
+                return 'Anbar #' + (segment.length > 8 ? segment.slice(0, 8) : segment);
               case 'insurance':
-                return 'Sığorta #' + segment;
+                return 'Sığorta #' + (segment.length > 8 ? segment.slice(0, 8) : segment);
               case 'prescription':
-                return 'Resept #' + segment;
+                return 'Resept #' + (segment.length > 8 ? segment.slice(0, 8) : segment);
+              case 'technicals-report':
+                return (segment.length > 8 ? segment.slice(0, 8) : segment);
               default:
-                return '#' + segment;
+                return (segment.length > 8 ? segment.slice(0, 8) : '#' + segment);
             }
           case 'mode':
             return segment === 'view' ? 'Baxış' : 'Redaktə';

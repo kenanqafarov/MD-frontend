@@ -99,9 +99,13 @@ function AddTechnician({ onClose }) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    let finalValue = value;
+    if (name === "finCode") {
+      finalValue = value.toUpperCase().slice(0, 7);
+    }
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: finalValue,
     }));
     
     // Clear error when user starts typing
@@ -366,6 +370,7 @@ function AddTechnician({ onClose }) {
               </p>
               <input
                 type="text"
+                maxLength={7}
                 className={`addTechnicianInput ${errors.finCode ? 'placeholder:!text-red-500' : ''}`}
                 name="finCode"
                 value={formData.finCode}

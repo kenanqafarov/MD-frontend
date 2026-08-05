@@ -22,6 +22,8 @@ function UserForm({ mode: initialMode, userData = null, onSubmit, onDelete }) {
   } = usePermissionStore();
   const [mode, setMode] = useState(initialMode);
   const [showModal, setShowModal] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [pendingSubmitData, setPendingSubmitData] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const navigate = useNavigate();
@@ -83,8 +85,8 @@ function UserForm({ mode: initialMode, userData = null, onSubmit, onDelete }) {
       .string()
       .nullable()
       .matches(
-        /^$|^[A-Z0-9]{7}$/,
-        "FIN kod boş və ya yalnız böyük hərflər və rəqəmlərdən ibarət 7 simvol olmalıdır"
+        /^$|^[a-zA-Z0-9]{7}$/,
+        "FIN kod boş və ya 7 simvol (rəqəm və ya hərflər) olmalıdır"
       ),
     genderStatus: yup.string().required("Cinsiyyət seçilməlidir"),
     dateOfBirth: yup
@@ -246,7 +248,7 @@ function UserForm({ mode: initialMode, userData = null, onSubmit, onDelete }) {
         name: data.name || "",
         surname: data.surname || "",
         patronymic: data.patronymic || "",
-        finCode: data.finCode || "",
+        finCode: (data.finCode || "").toUpperCase(),
         colorCode: (data.colorCode && data.colorCode.trim() !== "") ? data.colorCode : "#ffffff",
         genderStatus: data.genderStatus || "",
         dateOfBirth: data.dateOfBirth || "",
@@ -281,7 +283,8 @@ function UserForm({ mode: initialMode, userData = null, onSubmit, onDelete }) {
 
         await onSubmit(updateData);
       } else {
-        await onSubmit(transformedData);
+        setPendingSubmitData(transformedData);
+        setShowSaveModal(true);
       }
     } catch (error) {
       console.error("Form submission error:", error);
@@ -293,6 +296,23 @@ function UserForm({ mode: initialMode, userData = null, onSubmit, onDelete }) {
     }
   };
 
+  const executePendingSubmit = async () => {
+    if (!pendingSubmitData) return;
+    try {
+      await onSubmit(pendingSubmitData);
+    } catch (error) {
+      console.error("Form submission error:", error);
+      console.error("Error details:", error.response);
+      const apiErrorMessage =
+        error?.response?.message ||
+        "Xəta baş verdi. Zəhmət olmasa, yenidən cəhd edin.";
+      setErrorMessage(apiErrorMessage);
+    } finally {
+      setPendingSubmitData(null);
+      setShowSaveModal(false);
+    }
+  };
+
   return (
     <div className="main-form-container">
       <Modal
@@ -301,6 +321,18 @@ function UserForm({ mode: initialMode, userData = null, onSubmit, onDelete }) {
         title="Əminsinizmi?"
         message="İşçi silinəcək!"
         onConfirm={onDelete}
+      />
+      <Modal
+        isOpen={showSaveModal}
+        onClose={() => {
+          setShowSaveModal(false);
+          setPendingSubmitData(null);
+        }}
+        title="Yadda saxlanılsın?"
+        message="Dəyişikliklər yadda saxlanılsın mı?"
+        cancelText="Rədd et"
+        confirmText="Qəbul et"
+        onConfirm={executePendingSubmit}
       />
       <h3 className="main-form-title">
         {mode === "create"
@@ -317,7 +349,12 @@ function UserForm({ mode: initialMode, userData = null, onSubmit, onDelete }) {
 
       <form className="main-form" onSubmit={handleSubmit(handleFormSubmit)}>
         <div className={`${mode === "view" ? "profile-buttons" : ""}`}>
-          <ProfileImage userId={watch("username")} mode={mode} />
+          <ProfileImage 
+            initialImage={userData?.profilePhotoPath} 
+            value={watch("profilePhotoPath")} 
+            onImageChange={(url) => setValue("profilePhotoPath", url)} 
+            mode={mode} 
+          />
           {mode === "view" && (
             <div className="profile-button-group">
               <button
@@ -517,7 +554,12 @@ function UserForm({ mode: initialMode, userData = null, onSubmit, onDelete }) {
                 <input
                   id="finCode"
                   type="text"
-                  {...register("finCode")}
+                  maxLength={7}
+                  {...register("finCode", {
+                    onChange: (e) => {
+                      setValue("finCode", e.target.value.toUpperCase().slice(0, 7));
+                    },
+                  })}
                   placeholder="FIN kodu daxil edin"
                   readOnly={mode === "view"}
                   className={`!w-[457px] ${

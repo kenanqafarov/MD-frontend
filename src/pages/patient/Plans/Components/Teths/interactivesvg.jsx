@@ -142,9 +142,14 @@ const InteractiveSVG = ({
     );
   }
 
-  // categoryCode-a görə dişləri filtrlə
+  // categoryCode-a görə dişləri filtrlə (Əgər categoryCode data.json-da yoxdursa, default olaraq 1 istifadə et)
+  const isCategoryCodeValid = data.some((section) =>
+    section.categorys?.some((cat) => cat.categoryCode === categoryCode)
+  );
+  const activeCategoryCode = isCategoryCodeValid ? categoryCode : 1;
+
   const filteredCategories = data.flatMap((section) =>
-    section.categorys?.filter((cat) => cat.categoryCode === categoryCode) || []
+    section.categorys?.filter((cat) => cat.categoryCode === activeCategoryCode) || []
   );
 
   // Əgər categoryCode var amma o koda aid diş yoxdursa
@@ -194,7 +199,7 @@ const InteractiveSVG = ({
     if (!regionCode) return acc;
 
     const filteredCategories = section.categorys?.filter(
-      (cat) => cat.categoryCode === categoryCode
+      (cat) => cat.categoryCode === activeCategoryCode
     ) || [];
 
     if (filteredCategories.length === 0) return acc;

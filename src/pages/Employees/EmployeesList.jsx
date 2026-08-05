@@ -375,7 +375,7 @@ const EmployeesList = () => {
               </thead>
               <tbody className="!text-left">
                 {currentEmployees.map((emp) => (
-                  <tr key={emp.id}>
+                  <tr key={emp.id} onClick={() => handleInfoClick(emp)} style={{ cursor: "pointer" }}>
                     <td className="!text-left !pl-7">{emp.username}</td>
                     <td className="!text-left !pl-12">{emp.name}</td>
                     <td className="!text-left !pl-6">{emp.surname}</td>
@@ -385,7 +385,9 @@ const EmployeesList = () => {
                     <td>
                       <Link
                         className="employeeScheduleTableData"
-                        to={`work-schedule/${emp.id}`}>
+                        to={`work-schedule/${emp.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <CiCalendar className="employeeScheduleTableDataIcon" />{" "}
                         İş qrafiki
                       </Link>
@@ -406,7 +408,10 @@ const EmployeesList = () => {
                             <IconComponent
                               key={idx}
                               className={iconObj.className}
-                              onClick={() => iconObj.action(emp)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                iconObj.action(emp);
+                              }}
                             />
                           );
                         })}

@@ -6,6 +6,8 @@ import useExaminationStore from "../../../stores/examinationStore";
 import useTeethExaminationStore from "../../../stores/teeth-examinationStore";
 import "../../assets/style/Teeth/addexaminationpicture.css";
 
+import { uploadToCloudinary } from "../../utils/cloudinary";
+
 const AddExaminationPicture = () => {
   const { id: teethId } = useParams();
   const navigate = useNavigate(); // 🔄 navigate hook
@@ -21,10 +23,21 @@ const AddExaminationPicture = () => {
     fetchAllExaminations();
   }, []);
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
-    setImages((prev) => [...prev, ...files]);
-    fileInputRef.current.value = "";
+    if (!files.length) return;
+
+    for (const file of files) {
+      try {
+        const cloudinaryUrl = await uploadToCloudinary(file);
+        if (cloudinaryUrl) {
+          setImages((prev) => [...prev, cloudinaryUrl]);
+        }
+      } catch (err) {
+        console.error("Cloudinary upload failed:", err);
+      }
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleRemoveImage = (idx) => {

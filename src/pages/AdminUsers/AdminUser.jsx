@@ -212,7 +212,7 @@ const AdminUser = () => {
               </tr>
             ) : (
               filteredUsers.map((user, idx) => (
-                <tr key={user.id}>
+                <tr key={user.id} onClick={() => handleInfo(user.id)} style={{ cursor: "pointer" }}>
                   <td>{idx + 1}</td>
                   <td className="usernameOfAdminUser">
                     <img
@@ -238,15 +238,24 @@ const AdminUser = () => {
                     <div className="icons flex gap-3 cursor-pointer">
                       <CiCircleInfo
                         className="info"
-                        onClick={() => handleInfo(user.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleInfo(user.id);
+                        }}
                       />
                       <FiEdit3
                         className="edit"
-                        onClick={() => handleEdit(user.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(user.id);
+                        }}
                       />
                       <GoTrash
                         className="delete"
-                        onClick={() => handleDelete(user.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(user.id);
+                        }}
                       />
                     </div>
                   </td>

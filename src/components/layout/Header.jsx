@@ -84,7 +84,7 @@ function Header() {
       autoClose: 3000,
     });
     setTimeout(() => {
-      window.location.href = "/#/login";
+      window.location.href = "/login";
     }, 500);
   };
 

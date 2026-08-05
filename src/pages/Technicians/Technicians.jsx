@@ -170,7 +170,7 @@ function Technicians() {
               techList.map((tech) => 
                 // Hər bir "tech" obyektinin mövcudluğunu yenidən yoxlayın
                 tech && tech.username ? (
-                  <tr key={tech.id}>
+                  <tr key={tech.id} onClick={() => navigation(`${tech.id}`)} style={{ cursor: "pointer" }}>
                     <td className="usernameOfTech">
                       <img
                         src={`https://avatar.iran.liara.run/username?username=${encodeURIComponent(
@@ -187,7 +187,11 @@ function Technicians() {
                     <td>Texnik</td>
                     <td>{tech.phone}</td>
                     <td>
-                      <Link className="priceListLinkTech" to={`prices/${tech.id}`}>
+                      <Link 
+                        className="priceListLinkTech" 
+                        to={`prices/${tech.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         Qiymətlər
                       </Link>
                     </td>
@@ -196,7 +200,10 @@ function Technicians() {
                         className={`status ${
                           tech.status === "ACTIVE" ? "active" : "passive"
                         }`}
-                        onClick={() => toggleStatus(tech)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleStatus(tech);
+                        }}
                         style={{ cursor: "pointer" }}
                         title="Statusu dəyişmək üçün klikləyin"
                       >
@@ -210,7 +217,10 @@ function Technicians() {
                             <IconComp
                               key={idx}
                               className={className}
-                              onClick={() => action(tech)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                action(tech);
+                              }}
                             />
                           )
                         )}

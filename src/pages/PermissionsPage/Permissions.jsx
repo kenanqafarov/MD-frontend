@@ -141,11 +141,14 @@ function Permissions() {
             </thead>
             <tbody>
               {filteredData.map((row, index) => (
-                <tr key={row.id}>
+                <tr key={row.id} onClick={() => handleInfo(row)} style={{ cursor: "pointer" }}>
                   <td>{index + 1}</td>
                   <td className="permissionName">{row.permissionName}</td>
                   <td
-                    onClick={() => handleStatusToggle(row)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStatusToggle(row);
+                    }}
                     style={{ cursor: "pointer" }}>
                     <span
                       className={`statusBadge ${
@@ -160,15 +163,24 @@ function Permissions() {
                       <CiCircleInfo
                         size={20}
                         className="info"
-                        onClick={() => handleInfo(row)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleInfo(row);
+                        }}
                       />
                       <FiEdit3
                         className="editBtn"
-                        onClick={() => handleEdit(row)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(row);
+                        }}
                       />
                       <GoTrash
                         className="deleteBtn"
-                        onClick={() => handleDelete(row)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(row);
+                        }}
                       />
                     </div>
                   </td>

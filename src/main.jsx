@@ -4,7 +4,6 @@ import { lazy, StrictMode, useEffect, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import {
   BrowserRouter,
-  HashRouter,
   Routes,
   Route,
   useParams,
@@ -26,6 +25,7 @@ import { usePermission } from "./hooks/usePermission";
 
 // Components
 import ErrorBoundary from "./components/ErrorBoundary";
+import NotFound from "./pages/NotFound/NotFound";
 
 // Utils
 import { initWebVitals } from "./utils/webVitals";
@@ -659,7 +659,7 @@ const AnimatedRoutes = () => {
   }, [token, fetchPermissions]);
 
   const isPathAllowed = (pathname) => {
-    if (pathname === "/login" || pathname === "/") return true;
+    if (pathname === "/login2" || pathname === "/") return true;
     
     let mapInfo = routeModuleMap[pathname];
     
@@ -1180,6 +1180,8 @@ const AnimatedRoutes = () => {
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/change-password" element={<ChangePassword />} />
           </Route>
+
+          <Route path="*" element={<NotFound />} />
         </Routes>
         </Suspense>
       </div>
@@ -1191,9 +1193,9 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <HashRouter>
+        <BrowserRouter>
           <AnimatedRoutes />
-        </HashRouter>
+        </BrowserRouter>
         <ToastContainer position="top-right" autoClose={3000} />
         {/* <ReactQueryDevtools initialIsOpen={false} /> */}
       </QueryClientProvider>

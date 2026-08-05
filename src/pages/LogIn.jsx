@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
@@ -29,6 +29,36 @@ function LogIn() {
 
   const { login, error } = useAuthStore();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Hash-ı təmizlə (/login#/login -> /login)
+    if (window.location.hash) {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+
+    const token = localStorage.getItem("token");
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    if (token && refreshToken) {
+      try {
+        const parseToken = (t) => JSON.parse(atob(t.split(".")[1]));
+        const refreshPayload = parseToken(refreshToken);
+        const isRefreshExpired = !refreshPayload || !refreshPayload.exp || refreshPayload.exp * 1000 < Date.now();
+
+        if (!isRefreshExpired) {
+          const redirectPath = sessionStorage.getItem("redirectAfterLogin");
+          if (redirectPath && redirectPath !== "/login" && !redirectPath.startsWith("/login")) {
+            sessionStorage.removeItem("redirectAfterLogin");
+            navigate(redirectPath, { replace: true });
+          } else {
+            navigate("/employees", { replace: true });
+          }
+        }
+      } catch (err) {
+        // Token parse olunmadısa xəta vermədən login səhifəsində qal
+      }
+    }
+  }, [navigate]);
 
   const togglePasswordVisibility = () => {
     setPasswordShown(!passwordShown);

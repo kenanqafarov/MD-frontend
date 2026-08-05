@@ -184,11 +184,10 @@ function SentOrders() {
               filteredData.map((row, rowIndex) => {
                 const statusInfo = getStatusInfo(row.dentalWorkStatus);
                 return (
-                  <tr key={row.id}>
+                  <tr key={row.id} onClick={() => navigate(`/lab/orders/${row.id}`)} style={{ cursor: "pointer" }}>
                     <td className="!text-center">{rowIndex + 1}</td>
                     <td className="px-4">{row.doctor || "-"}</td>
                     <td
-                      onClick={() => navigate(`/lab/orders/${row.id}`)}
                       className="patinetTD !text-center px-4"
                       style={{ cursor: "pointer", color: "#155EEF" }}
                     >
@@ -207,7 +206,10 @@ function SentOrders() {
                           {icons.map((iconObj, iconIdx) => (
                             <span
                               key={iconIdx}
-                              onClick={() => iconObj.action(row)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                iconObj.action(row);
+                              }}
                               style={{ cursor: "pointer" }}
                             >
                               {React.createElement(iconObj.icon, {

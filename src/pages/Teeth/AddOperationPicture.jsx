@@ -9,6 +9,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import useOperationTypesStore from "../../../stores/operationsTypeStore";
 import useOperationItemsTypeStore from "../../../stores/operationItemTypeStore";
 import useTeethOperationStore from "../../../stores/teeth-opetaionStore";
+import { uploadToCloudinary } from "../../utils/cloudinary";
 
 const AddOperationPicture = () => {
   const { id } = useParams(); // teethId
@@ -42,13 +43,18 @@ const AddOperationPicture = () => {
   }, [selectedCategory]);
 
   // Şəkil upload
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => setImage(reader.result);
-    reader.readAsDataURL(file);
+    try {
+      const cloudinaryUrl = await uploadToCloudinary(file);
+      if (cloudinaryUrl) {
+        setImage(cloudinaryUrl);
+      }
+    } catch (err) {
+      console.error("Operation image upload failed:", err);
+    }
   };
 
   const handleImageDelete = () => {

@@ -238,9 +238,13 @@ const handleSubmit = async (e) => {
               <label>FIN kod</label>
               <input
                 type="text"
+                maxLength={7}
                 ref={formRefs.finCode}
                 disabled={formLoading}
                 defaultValue={selectedPatient?.finCode || ""}
+                onChange={(e) => {
+                  e.target.value = e.target.value.toUpperCase().slice(0, 7);
+                }}
               />
             </div>
             <div className="main-form-group">

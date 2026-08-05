@@ -1,0 +1,31 @@
+/* NotFound page styles */
+
+body {
+	margin: 0;
+}
+
+div {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	background: linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #0ea5e9 100%);
+	color: #ffffff;
+	text-align: center;
+	font-family: "Poppins", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+	padding: 24px;
+	box-sizing: border-box;
+}
+
+h1 {
+	margin: 0;
+	font-size: clamp(2rem, 6vw, 4rem);
+	font-weight: 800;
+	letter-spacing: 0.5px;
+	text-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+	background: linear-gradient(90deg, #ffffff 0%, #bae6fd 100%);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+}

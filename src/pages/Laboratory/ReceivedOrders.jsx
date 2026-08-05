@@ -274,13 +274,12 @@ function ReceivedOrders() {
                 const nextStatusText = getNextStatusText(row.dentalWorkStatus);
 
                 return (
-                  <tr key={row.id}>
+                  <tr key={row.id} onClick={() => navigate(`/lab/orders/${row.id}`)} style={{ cursor: "pointer" }}>
                     <td>{rowIndex + 1}</td>
 
                     <td>{row.doctor || "-"}</td>
 
                     <td
-                      onClick={() => navigate(`/lab/orders/${row.id}`)}
                       className="patinetTD"
                       style={{ cursor: "pointer", color: "#155EEF" }}>
                       {row.patient || "-"}
@@ -292,11 +291,14 @@ function ReceivedOrders() {
                     <td>
                       <span 
                         className={`status-badge ${statusInfo.type}`}
-                        onClick={() => handleStatusChange(
-                          row.id, 
-                          row.dentalWorkStatus, 
-                          row.patient || "Sifariş"
-                        )}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStatusChange(
+                            row.id, 
+                            row.dentalWorkStatus, 
+                            row.patient || "Sifariş"
+                          );
+                        }}
                         style={{ 
                           cursor: 'pointer',
                           transition: 'all 0.3s ease',
@@ -317,7 +319,10 @@ function ReceivedOrders() {
                         {icons.map((iconObj, i) => (
                           <span
                             key={i}
-                            onClick={() => iconObj.action(row)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              iconObj.action(row);
+                            }}
                             style={{ cursor: "pointer" }}>
                             {React.createElement(iconObj.icon, {
                               className: `icon ${iconObj.className}`,

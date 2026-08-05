@@ -5,6 +5,7 @@ import { FaCalendarAlt } from "react-icons/fa";
 import { IoMdClose, IoMdCheckmarkCircleOutline } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
 import usePatientXrayStore from "../../../stores/patient-xrayStore";
+import { uploadToCloudinary } from "../../utils/cloudinary";
 
 const AddXRay = () => {
     const navigate = useNavigate();
@@ -21,6 +22,7 @@ const AddXRay = () => {
     });
 
     const [newImages, setNewImages] = useState([]);
+    const [uploading, setUploading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -30,17 +32,29 @@ const AddXRay = () => {
         }));
     };
 
-    const handleNewImageUpload = (e) => {
+    const handleNewImageUpload = async (e) => {
         const files = Array.from(e.target.files);
-        setNewImages(prevImages => [
-            ...prevImages,
-            ...files.map(file => ({
-                file,
-                preview: URL.createObjectURL(file), // Şəkil preview üçün URL
-                isNew: true // Yeni yüklənən şəkil olduğunu göstərir
-            }))
-        ]);
-        e.target.value = null; // Seçilmiş faylları təmizlə ki, eyni fayl təkrar seçilə bilsin
+        if (!files.length) return;
+
+        setUploading(true);
+        for (const file of files) {
+            try {
+                const cloudinaryUrl = await uploadToCloudinary(file);
+                setNewImages(prevImages => [
+                    ...prevImages,
+                    {
+                        file,
+                        url: cloudinaryUrl,
+                        preview: cloudinaryUrl,
+                        isNew: true
+                    }
+                ]);
+            } catch (err) {
+                console.error("Xray upload failed:", err);
+            }
+        }
+        setUploading(false);
+        e.target.value = null;
     };
 
     const handleRemoveImage = (indexToRemove) => {

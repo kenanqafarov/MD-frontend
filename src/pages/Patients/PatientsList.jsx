@@ -28,7 +28,7 @@ const initialSearch = {
 // Memoized table row component
 const PatientRow = React.memo(({ item, onInfoClick, onDeleteClick, canDelete }) => {
   return (
-    <tr>
+    <tr onClick={() => onInfoClick(item)} style={{ cursor: "pointer" }}>
       <td>{item.id}</td>
       <td>{item.id}</td>
       <td>{item.name}</td>
@@ -42,12 +42,18 @@ const PatientRow = React.memo(({ item, onInfoClick, onDeleteClick, canDelete }) 
         <div className="actionsWrapper">
           <CiCircleInfo
             className="icon info"
-            onClick={() => onInfoClick(item)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onInfoClick(item);
+            }}
           />
           {canDelete && (
             <GoTrash
               className="icon delete"
-              onClick={() => onDeleteClick(item)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteClick(item);
+              }}
             />
           )}
         </div>

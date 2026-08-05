@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useForm } from "react-hook-form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark, faCheck } from "@fortawesome/free-solid-svg-icons";
+import { faXmark, faCheck, faTooth } from "@fortawesome/free-solid-svg-icons";
 import CustomDropdown from "./CustomDropdown";
-import ToothSelector from "./ToothSelector";
 import MultiFileForm from "./MultiFileForm";
 import useDentalOrderStore from "../../stores/dentalOrderStore";
 import { readAllTeeth, createTooth } from "../api/teeth";
@@ -24,12 +25,24 @@ const fallbackColors = [
   { value: 3, label: "A3" },
   { value: 4, label: "A3.5" },
   { value: 5, label: "A4" },
+  { value: 6, label: "B1" },
+  { value: 7, label: "B2" },
+  { value: 8, label: "C1" },
+  { value: 9, label: "D2" },
+  { value: 10, label: "BL1" },
 ];
 const fallbackMetals = [
   { value: 1, label: "Nikel-Krom" },
   { value: 2, label: "Kobalt-Krom" },
   { value: 3, label: "Titanyum" },
   { value: 4, label: "Altın Alaşım" },
+  { value: 5, label: "Zirkonium" },
+];
+const fallbackCeramics = [
+  { value: 1, label: "E-Max" },
+  { value: 2, label: "Feldspatik" },
+  { value: 3, label: "Zirkon Keramika" },
+  { value: 4, label: "Vita VM9" },
 ];
 const fallbackGarnitures = [
   { value: 1, label: "Standard" },
@@ -52,6 +65,19 @@ const formatDate = (dateString) => {
   }
 };
 
+// Adult FDI Teeth Numbers matching exact paper layout:
+// Upper: 18 17 16 15 14 13 12 11 | 21 22 23 24 25 26 27 28
+// Lower: 48 47 46 45 44 43 42 41 | 31 32 33 34 35 36 37 38
+const ADULT_UPPER_RIGHT = [18, 17, 16, 15, 14, 13, 12, 11];
+const ADULT_UPPER_LEFT = [21, 22, 23, 24, 25, 26, 27, 28];
+const ADULT_LOWER_RIGHT = [48, 47, 46, 45, 44, 43, 42, 41];
+const ADULT_LOWER_LEFT = [31, 32, 33, 34, 35, 36, 37, 38];
+
+const CHILD_UPPER_RIGHT = [55, 54, 53, 52, 51];
+const CHILD_UPPER_LEFT = [61, 62, 63, 64, 65];
+const CHILD_LOWER_RIGHT = [85, 84, 83, 82, 81];
+const CHILD_LOWER_LEFT = [71, 72, 73, 74, 75];
+
 const OrderForm = ({
   initialData,
   mode = "create",
@@ -72,9 +98,9 @@ const OrderForm = ({
   const [ceramics, setCeramics] = useState([]);
   const [metals, setMetals] = useState([]);
 
-  // Other component states
+  // Tooth selection states
   const [selectedTeeth, setSelectedTeeth] = useState(
-    initialData?.teethList || []
+    initialData?.teethList?.map(t => (typeof t === 'object' ? t.toothNo : t)) || []
   );
   const [isChild, setIsChild] = useState(
     initialData?.isChild !== undefined ? initialData.isChild : false
@@ -92,17 +118,24 @@ const OrderForm = ({
     if (initialData) {
       const formattedData = {
         ...initialData,
-        orderDate: formatDate(initialData.orderDate),
-        inspectionDate: formatDate(
-          initialData.inspectionDate || initialData.checkDate
+        orderDate: formatDate(initialData.orderDate || new Date()),
+        inspectionDateM: formatDate(
+          initialData.inspectionDateM || initialData.checkDate || initialData.inspectionDate
+        ),
+        inspectionDateK: formatDate(
+          initialData.inspectionDateK || initialData.checkDateK
         ),
         deliveryDate: formatDate(initialData.deliveryDate),
         doctor: initialData.doctorId || initialData.doctor,
         technician: initialData.technicianId || initialData.technician,
         patient: initialData.patientId || initialData.patient,
-        workType: initialData.dentalWorkType,
-        notes: initialData.description || initialData.notes,
-        color: initialData.orderDentureInfo?.color ? Number(initialData.orderDentureInfo?.color) : null,
+        workType: initialData.dentalWorkType || "QAPAQ",
+        metalWork: initialData.metalWork || "",
+        ceramicWork: initialData.ceramicWork || "",
+        report: initialData.description || initialData.notes || initialData.report || "",
+        color: initialData.orderDentureInfo?.color || initialData.color ? Number(initialData.orderDentureInfo?.color || initialData.color) : null,
+        metal: initialData.metalId || initialData.metal ? Number(initialData.metalId || initialData.metal) : null,
+        ceramic: initialData.ceramicId || initialData.ceramic ? Number(initialData.ceramicId || initialData.ceramic) : null,
         garniture: initialData.orderDentureInfo?.garniture ? Number(initialData.orderDentureInfo?.garniture) : null,
       };
       reset(formattedData);
@@ -127,10 +160,14 @@ const OrderForm = ({
       setIsChild(
         initialData.isChild !== undefined ? initialData.isChild : false
       );
+    } else {
+      // Set default current date for orderDate if creating new
+      setValue("orderDate", formatDate(new Date()));
+      setValue("workType", "QAPAQ");
     }
-  }, [initialData, reset]);
+  }, [initialData, reset, setValue]);
 
-  // Fetch data only once on component mount
+  // Fetch data on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -144,47 +181,68 @@ const OrderForm = ({
           useMetalStore.getState().fetchMetals(),
         ]);
 
+        const fetchedGarnitures = useGarnitureStore.getState().garnitures;
         setGarnitures(
-          useGarnitureStore.getState().garnitures?.map((item) => ({
-            value: item.id,
-            label: item.name || "N/A",
-          })) || fallbackGarnitures
+          fetchedGarnitures && fetchedGarnitures.length > 0
+            ? fetchedGarnitures.map((item) => ({
+                value: item.id,
+                label: item.name || "N/A",
+              }))
+            : fallbackGarnitures
         );
+
+        const fetchedColors = useColorStore.getState().colors;
         setColors(
-          useColorStore.getState().colors?.map((item) => ({
-            value: item.id,
-            label: item.name || "N/A",
-          })) || fallbackColors
+          fetchedColors && fetchedColors.length > 0
+            ? fetchedColors.map((item) => ({
+                value: item.id,
+                label: item.name || "N/A",
+              }))
+            : fallbackColors
         );
+
+        const fetchedTechs = useTechnicianStore.getState().technicians;
         setTechnicians(
-          useTechnicianStore.getState().technicians?.map((item) => ({
-            value: item.id,
-            label: `${item.name} ${item.surname}`,
-          })) || []
+          fetchedTechs && fetchedTechs.length > 0
+            ? fetchedTechs.map((item) => ({
+                value: item.id,
+                label: `${item.name} ${item.surname}`,
+              }))
+            : []
         );
+
+        const fetchedPatients = usePatientStore.getState().patients;
         setPatients(
-          usePatientStore.getState().patients?.map((item) => ({
-            value: item.id,
-            label: `${item.name} ${item.surname}`,
-          })) || []
+          fetchedPatients && fetchedPatients.length > 0
+            ? fetchedPatients.map((item) => ({
+                value: item.id,
+                label: `${item.name} ${item.surname}`,
+              }))
+            : []
         );
+
+        const fetchedDoctors = useCalendarStore.getState().doctors;
         setDoctors(
-          useCalendarStore.getState().doctors?.map((item) => ({
-            value: item.doctorId || item.id,
-            label: `${item.name} ${item.surname}`,
-          })) || []
+          fetchedDoctors && fetchedDoctors.length > 0
+            ? fetchedDoctors.map((item) => ({
+                value: item.doctorId || item.id,
+                label: `${item.name} ${item.surname}`,
+              }))
+            : []
         );
+
+        const fetchedCeramics = useCeramicsStore.getState().ceramics;
         setCeramics(
-          useCeramicsStore
-            .getState()
-            .ceramics?.map((item) => ({ value: item.id, label: item.name })) ||
-            []
+          fetchedCeramics && fetchedCeramics.length > 0
+            ? fetchedCeramics.map((item) => ({ value: item.id, label: item.name }))
+            : fallbackCeramics
         );
+
+        const fetchedMetals = useMetalStore.getState().metals;
         setMetals(
-          useMetalStore
-            .getState()
-            .metals?.map((item) => ({ value: item.id, label: item.name })) ||
-            fallbackMetals
+          fetchedMetals && fetchedMetals.length > 0
+            ? fetchedMetals.map((item) => ({ value: item.id, label: item.name }))
+            : fallbackMetals
         );
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -193,30 +251,28 @@ const OrderForm = ({
     fetchData();
   }, []);
 
-  const handleToothSelect = (tooth) => {
-    const newSelectedTeeth = selectedTeeth.includes(tooth)
-      ? selectedTeeth.filter((t) => t !== tooth)
-      : [...selectedTeeth, tooth];
-    setSelectedTeeth(newSelectedTeeth);
+  const handleToothToggle = (toothNum) => {
+    if (mode === "view") return;
+    const isSelected = selectedTeeth.includes(toothNum);
+    const updatedTeeth = isSelected
+      ? selectedTeeth.filter((t) => t !== toothNum)
+      : [...selectedTeeth, toothNum];
 
-    const newToothDetails = [...toothDetails];
-    newSelectedTeeth.forEach((toothNumber) => {
-      if (
-        !newToothDetails.find((detail) => detail.toothNumber === toothNumber)
-      ) {
-        newToothDetails.push({
-          toothNumber,
+    setSelectedTeeth(updatedTeeth);
+
+    // Update tooth details
+    const updatedDetails = [...toothDetails];
+    if (!isSelected) {
+      if (!updatedDetails.find((d) => d.toothNumber === toothNum)) {
+        updatedDetails.push({
+          toothNumber: toothNum,
           colorId: null,
           metalId: null,
           ceramicId: null,
         });
       }
-    });
-
-    const filteredDetails = newToothDetails.filter((detail) =>
-      newSelectedTeeth.includes(detail.toothNumber)
-    );
-    setToothDetails(filteredDetails);
+    }
+    setToothDetails(updatedDetails.filter((d) => updatedTeeth.includes(d.toothNumber)));
   };
 
   const handleToothDetailChange = (toothNumber, field, value) => {
@@ -247,66 +303,89 @@ const OrderForm = ({
 
   const handleFormSubmit = async (data) => {
     try {
-      // 1. Fetch current registered teeth from DB to check/create
+      const finalPatientId = data.patient ? parseInt(data.patient) : (lockedPatientId ? parseInt(lockedPatientId) : (initialData?.patientId ? parseInt(initialData.patientId) : null));
+      const finalDoctorId = data.doctor ? String(data.doctor) : (initialData?.doctorId ? String(initialData.doctorId) : null);
+
+      if (!finalPatientId) {
+        toast.error("Zəhmət olmasa, pasiyenti seçin.");
+        return;
+      }
+      if (!data.orderDate || !data.deliveryDate) {
+        toast.error("Zəhmət olmasa, işin giriş və təhvil tarixlərini seçin.");
+        return;
+      }
+
+      // Fetch registered teeth from DB
       const currentDbTeeth = await readAllTeeth();
       const resolvedTeethIds = [];
 
-      if (data.workType === "QAPAQ") {
-        for (const toothNo of selectedTeeth) {
-          let dbTooth = currentDbTeeth.find((t) => Number(t.toothNo) === Number(toothNo));
-          if (!dbTooth) {
-            const parsed = parseFDINumber(toothNo);
-            if (parsed) {
-              dbTooth = await createTooth({
-                toothNo: Number(toothNo),
-                toothType: parsed.type,
-                toothLocation: parsed.location
-              });
-              currentDbTeeth.push(dbTooth);
-            }
+      for (const toothNo of selectedTeeth) {
+        let dbTooth = currentDbTeeth.find((t) => Number(t.toothNo) === Number(toothNo));
+        if (!dbTooth) {
+          const parsed = parseFDINumber(toothNo);
+          if (parsed) {
+            dbTooth = await createTooth({
+              toothNo: Number(toothNo),
+              toothType: parsed.type,
+              toothLocation: parsed.location
+            });
+            currentDbTeeth.push(dbTooth);
           }
-          if (dbTooth) {
-            resolvedTeethIds.push(Number(dbTooth.id));
-          }
+        }
+        if (dbTooth) {
+          resolvedTeethIds.push(Number(dbTooth.id));
         }
       }
 
-      // 2. Prepare toothDetailIds matching the indices of resolvedTeethIds
+      // Prepare tooth detail IDs matching resolved teeth IDs
       const toothDetailIds = resolvedTeethIds.map((teethId) => {
         const dbTooth = currentDbTeeth.find((t) => Number(t.id) === Number(teethId));
         const toothNo = dbTooth ? dbTooth.toothNo : null;
         const localDetail = toothDetails.find((d) => Number(d.toothNumber) === Number(toothNo)) || {};
 
-        return {
-          colorId: localDetail.colorId ? Number(localDetail.colorId) : null,
-          metalId: localDetail.metalId ? Number(localDetail.metalId) : null,
-          ceramicId: localDetail.ceramicId ? Number(localDetail.ceramicId) : null,
-        };
-      });
+        const colorId = localDetail.colorId ? Number(localDetail.colorId) : (data.color ? Number(data.color) : null);
+        const metalId = localDetail.metalId ? Number(localDetail.metalId) : (data.metal ? Number(data.metal) : null);
+        const ceramicId = localDetail.ceramicId ? Number(localDetail.ceramicId) : (data.ceramic ? Number(data.ceramic) : null);
 
-      // 3. Construct the payload matching the Swagger spec
+        return { colorId, metalId, ceramicId };
+      }).filter((detail) => detail.colorId !== null || detail.metalId !== null || detail.ceramicId !== null);
+
+      // Construct description with full paper form fields
+      const descriptionLines = [];
+      if (data.metalWork) descriptionLines.push(`Metal işi: ${data.metalWork}`);
+      if (data.ceramicWork) descriptionLines.push(`Keramikanın işi: ${data.ceramicWork}`);
+      if (data.report) descriptionLines.push(`Hesabat: ${data.report}`);
+      const fullDescription = descriptionLines.join(" | ");
+
+      // Filter resolvedTeethIds to ensure valid non-null numbers
+      const validTeethIds = resolvedTeethIds.filter((id) => id !== null && id !== undefined && !isNaN(id));
+
       const submitData = {
-        checkDate: data.inspectionDate,
+        checkDate: data.inspectionDateM || data.inspectionDateK || data.orderDate,
         orderDate: data.orderDate,
         deliveryDate: data.deliveryDate,
-        description: data.notes || "",
-        dentalWorkType: data.workType,
+        description: fullDescription || data.report || "",
+        dentalWorkType: data.workType || "QAPAQ",
         toothDetailIds: toothDetailIds,
-        teethList: resolvedTeethIds,
-        doctorId: data.doctor,
-        technicianId: data.technician,
-        patientId: parseInt(data.patient),
+        teethList: validTeethIds,
+        doctorId: finalDoctorId,
+        technicianId: data.technician ? String(data.technician) : null,
+        patientId: finalPatientId,
       };
 
-      if (data.workType === "PROTEZ") {
+      if (data.workType === "PROTEZ" || data.color || data.garniture) {
         submitData.orderDentureInfo = {
           color: data.color ? String(data.color) : null,
           garniture: data.garniture ? String(data.garniture) : null,
         };
       }
 
-      if (files.length > 0) {
-        submitData.files = files.map((file) => file.base64 || file);
+      const base64Files = files
+        .map((file) => (typeof file === "object" ? file.base64 : file))
+        .filter((file) => typeof file === "string" && file.startsWith("data:"));
+
+      if (base64Files.length > 0) {
+        submitData.files = base64Files;
       }
 
       if (mode === "create") {
@@ -314,6 +393,9 @@ const OrderForm = ({
       } else if (mode === "edit") {
         await dentalOrderStore.editOrder({ ...submitData, id: initialData.id });
       }
+
+      toast.success("Sifariş uğurla saxlanıldı!");
+
       if (onSubmit) {
         onSubmit(submitData);
       }
@@ -323,185 +405,148 @@ const OrderForm = ({
   };
 
   const workTypes = [
+    { value: "QAPAQ", label: "Qapaq / Metal-Keramika" },
     { value: "PROTEZ", label: "Protez" },
-    { value: "QAPAQ", label: "Qapaq" },
+    { value: "IMPLANT", label: "İmplant Üstü" },
+    { value: "ZIRKON", label: "Zirkon" },
   ];
+
   const formValues = watch();
 
   const selectedDoctor = useMemo(() => {
     const found = doctors.find((d) => d.value === formValues.doctor);
-    if (!found && formValues.doctor && typeof formValues.doctor === "string") {
-      return { value: formValues.doctor, label: formValues.doctor };
+    if (!found && formValues.doctor) {
+      return { value: formValues.doctor, label: String(formValues.doctor) };
     }
     return found || null;
   }, [doctors, formValues.doctor]);
 
   const selectedTechnician = useMemo(() => {
     const found = technicians.find((t) => t.value === formValues.technician);
-    if (!found && formValues.technician && typeof formValues.technician === "string") {
-      return { value: formValues.technician, label: formValues.technician };
+    if (!found && formValues.technician) {
+      return { value: formValues.technician, label: String(formValues.technician) };
     }
     return found || null;
   }, [technicians, formValues.technician]);
 
   const selectedPatient = useMemo(() => {
     const found = patients.find((p) => p.value === formValues.patient);
-    if (!found && formValues.patient && typeof formValues.patient === "string") {
-      return { value: formValues.patient, label: formValues.patient };
+    if (!found && formValues.patient) {
+      return { value: formValues.patient, label: String(formValues.patient) };
     }
     return found || null;
   }, [patients, formValues.patient]);
+
   const selectedWorkType = useMemo(
-    () => workTypes.find((w) => w.value === formValues.workType) || null,
-    [workTypes, formValues.workType]
+    () => workTypes.find((w) => w.value === formValues.workType) || workTypes[0],
+    [formValues.workType]
   );
+
   const selectedColor = useMemo(
     () => colors.find((c) => c.value === formValues.color) || null,
     [colors, formValues.color]
   );
-  const selectedGarniture = useMemo(
-    () => garnitures.find((g) => g.value === formValues.garniture) || null,
-    [garnitures, formValues.garniture]
+  const selectedMetal = useMemo(
+    () => metals.find((m) => m.value === formValues.metal) || null,
+    [metals, formValues.metal]
   );
-  
-  // DÜZƏLİŞ: PROTEZ iş növü üçün qarnitur və rəng sahələrini göstər
-  const renderDentureFields = formValues.workType === "PROTEZ";
-  // DÜZƏLİŞ: QAPAQ iş növü üçün diş seçim sahələrini göstər
-  const renderToothFields = formValues.workType === "QAPAQ";
+  const selectedCeramic = useMemo(
+    () => ceramics.find((c) => c.value === formValues.ceramic) || null,
+    [ceramics, formValues.ceramic]
+  );
+
+  const upperRightTeeth = isChild ? CHILD_UPPER_RIGHT : ADULT_UPPER_RIGHT;
+  const upperLeftTeeth = isChild ? CHILD_UPPER_LEFT : ADULT_UPPER_LEFT;
+  const lowerRightTeeth = isChild ? CHILD_LOWER_RIGHT : ADULT_LOWER_RIGHT;
+  const lowerLeftTeeth = isChild ? CHILD_LOWER_LEFT : ADULT_LOWER_LEFT;
 
   return (
     <form
       onSubmit={handleSubmit(handleFormSubmit)}
-      className="flex flex-col gap-2">
-      <div className="flex flex-col gap-2 border border-[#E5E7EB] rounded-lg p-6 bg-white">
-        {/* Doctor Dropdown */}
-        <div className="flex justify-between items-center gap-2">
-          <label htmlFor="doctor">
-            {" "}
-            Həkim <span className="text-red-500">*</span>{" "}
-          </label>
-          <div className="w-[950px]">
+      className="flex flex-col gap-6 w-full max-w-5xl mx-auto p-2"
+    >
+      <ToastContainer />
+      {/* Paper Form Header Card - MÜASİR STOMATOLOGİYA */}
+      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white rounded-xl shadow-lg p-6 border-b-4 border-blue-500">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-center md:text-left">
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-wider uppercase flex items-center gap-3">
+              <FontAwesomeIcon icon={faTooth} className="text-blue-400 text-3xl" />
+              MÜASİR STOMATOLOGİYA
+            </h1>
+            <p className="text-blue-200 text-sm font-medium mt-1">
+              DENTAL LABORATORİYA SİFARİŞ FORMASI
+            </p>
+          </div>
+          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
+            <span className="text-xs uppercase font-semibold text-blue-200">Rejim:</span>
+            <span className="text-sm font-bold text-white uppercase">{mode === "view" ? "Baxış" : mode === "edit" ? "Düzəliş" : "Yeni Sifariş"}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Metadata Section (Matching Form Fields) */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
+        <h2 className="text-base font-semibold text-gray-800 border-b border-gray-100 pb-3 flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+          Əsas Məlumatlar
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Həkim */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Həkim <span className="text-red-500">*</span>
+            </label>
             <CustomDropdown
               options={doctors}
               value={selectedDoctor}
-              onChange={(option) =>
-                setValue("doctor", option ? option.value : null)
-              }
-              placeholder="Həkim seçin"
+              onChange={(option) => setValue("doctor", option ? option.value : null)}
+              placeholder="Həkim seçin (məs: N.Çobanov)"
               name="doctor"
               disabled={mode === "view"}
             />
           </div>
-        </div>
 
-        {/* Technician Dropdown */}
-        <div className="flex justify-between items-center gap-2">
-          <label htmlFor="technician">
-            {" "}
-            Texnik <span className="text-red-500">*</span>{" "}
-          </label>
-          <div className="w-[950px]">
+          {/* Xəstə (Patient) */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Xəstə (Pasiyent) <span className="text-red-500">*</span>
+            </label>
+            <CustomDropdown
+              options={patients}
+              value={selectedPatient}
+              onChange={(option) => setValue("patient", option ? option.value : null)}
+              placeholder="Xəstəni seçin"
+              name="patient"
+              disabled={mode === "view" || lockedPatientId !== null}
+            />
+          </div>
+
+          {/* Texnik */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Texnik
+            </label>
             <CustomDropdown
               options={technicians}
               value={selectedTechnician}
-              onChange={(option) =>
-                setValue("technician", option ? option.value : null)
-              }
+              onChange={(option) => setValue("technician", option ? option.value : null)}
               placeholder="Texnik seçin"
               name="technician"
               disabled={mode === "view"}
             />
           </div>
-        </div>
 
-        {/* Patient Dropdown */}
-        <div className="flex justify-between items-center gap-2">
-          <label htmlFor="patient">
-            {" "}
-            Pasiyent <span className="text-red-500">*</span>{" "}
-          </label>
-          <div className="w-[950px]">
-            <CustomDropdown
-              options={patients}
-              value={selectedPatient}
-              onChange={(option) =>
-                setValue("patient", option ? option.value : null)
-              }
-              placeholder="Pasiyent seçin"
-              name="patient"
-              disabled={mode === "view" || lockedPatientId !== null}
-            />
-          </div>
-        </div>
-
-        {/* Date Inputs */}
-        <div className="flex justify-between items-center gap-2">
-          <label htmlFor="orderDate">
-            {" "}
-            Sifariş tarixi <span className="text-red-500">*</span>{" "}
-          </label>
-          <div className="w-[950px]">
-            <input
-              id="orderDate"
-              type="date"
-              {...register("orderDate", { required: true })}
-              readOnly={mode === "view"}
-              className={`w-full h-10 border border-[#D4DCE8] rounded-lg px-4 py-2 ${
-                mode === "view" ? "bg-gray-200" : ""
-              }`}
-            />
-          </div>
-        </div>
-        <div className="flex justify-between items-center gap-2">
-          <label htmlFor="inspectionDate">
-            {" "}
-            Yoxlanılma tarixi <span className="text-red-500">*</span>{" "}
-          </label>
-          <div className="w-[950px]">
-            <input
-              id="inspectionDate"
-              type="date"
-              {...register("inspectionDate", { required: true })}
-              readOnly={mode === "view"}
-              className={`w-full h-10 border border-[#D4DCE8] rounded-lg px-4 py-2 ${
-                mode === "view" ? "bg-gray-200" : ""
-              }`}
-            />
-          </div>
-        </div>
-        <div className="flex justify-between items-center gap-2">
-          <label htmlFor="deliveryDate">
-            {" "}
-            Təhvil tarixi <span className="text-red-500">*</span>{" "}
-          </label>
-          <div className="w-[950px]">
-            <input
-              id="deliveryDate"
-              type="date"
-              {...register("deliveryDate", { required: true })}
-              readOnly={mode === "view"}
-              className={`w-full h-10 border border-[#D4DCE8] rounded-lg px-4 py-2 ${
-                mode === "view" ? "bg-gray-200" : ""
-              }`}
-            />
-          </div>
-        </div>
-
-        {/* Work Type Dropdown */}
-        <div className="flex justify-between items-center gap-2">
-          <label htmlFor="workType">
-            {" "}
-            İşin növü <span className="text-red-500">*</span>{" "}
-          </label>
-          <div className="w-[950px]">
+          {/* İşin növü */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              İşin növü <span className="text-red-500">*</span>
+            </label>
             <CustomDropdown
               options={workTypes}
               value={selectedWorkType}
-              onChange={(option) => {
-                setValue("workType", option ? option.value : null);
-                setSelectedTeeth([]);
-                setToothDetails([]);
-              }}
+              onChange={(option) => setValue("workType", option ? option.value : "QAPAQ")}
               placeholder="İşin növünü seçin"
               name="workType"
               disabled={mode === "view"}
@@ -509,212 +554,352 @@ const OrderForm = ({
           </div>
         </div>
 
-        {/* Conditional Denture Fields - PROTEZ üçün */}
-        {renderDentureFields && (
-          <>
-            <div className="flex justify-between items-center gap-2">
-              <label>
-                {" "}
-                Rəng <span className="text-red-500">*</span>{" "}
-              </label>
-              <div className="w-[950px]">
-                <CustomDropdown
-                  options={colors}
-                  value={selectedColor}
-                  onChange={(option) =>
-                    setValue("color", option ? option.value : null)
-                  }
-                  placeholder="Rəng seçin"
-                  disabled={mode === "view"}
-                />
-              </div>
-            </div>
-            <div className="flex justify-between items-center gap-2">
-              <label htmlFor="garniture">
-                {" "}
-                Qarnitur <span className="text-red-500">*</span>{" "}
-              </label>
-              <div className="w-[950px]">
-                <CustomDropdown
-                  options={garnitures}
-                  value={selectedGarniture}
-                  onChange={(option) =>
-                    setValue("garniture", option ? option.value : null)
-                  }
-                  placeholder="Qarnitur seçin"
-                  name="garniture"
-                  disabled={mode === "view"}
-                />
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Notes */}
-        <div className="flex justify-between items-center gap-2">
-          <label htmlFor="notes">Qeyd</label>
-          <div className="w-[950px]">
-            <textarea
-              id="notes"
-              {...register("notes")}
+        {/* Date Fields Grid matching physical form:
+            - İşin giriş vaxtı
+            - İşin yoxlanma vaxtı (M)
+            - İşin yoxlanma vaxtı (K)
+            - İşin təhvil vaxtı
+        */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="orderDate" className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              İşin giriş vaxtı <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="orderDate"
+              type="date"
+              {...register("orderDate", { required: true })}
               readOnly={mode === "view"}
-              className={`w-full h-32 border border-[#D4DCE8] rounded-lg px-4 py-2 resize-none ${
-                mode === "view" ? "bg-gray-200" : ""
-              }`}
-              placeholder="Qeydlər..."
+              className="w-full h-10 border border-gray-300 rounded-lg px-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
             />
           </div>
-        </div>
 
-        {/* File Upload */}
-        <div className="flex justify-between items-center gap-2">
-          <label htmlFor="files">Fayllar</label>
-          <div className="w-[950px]">
-            <MultiFileForm
-              onFilesChange={handleFilesChange}
-              disabled={mode === "view"}
-              initialFiles={initialData?.files || []}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="inspectionDateM" className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              İşin yoxlanma vaxtı (M)
+            </label>
+            <input
+              id="inspectionDateM"
+              type="date"
+              {...register("inspectionDateM")}
+              readOnly={mode === "view"}
+              className="w-full h-10 border border-gray-300 rounded-lg px-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="inspectionDateK" className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              İşin yoxlanma vaxtı (K)
+            </label>
+            <input
+              id="inspectionDateK"
+              type="date"
+              {...register("inspectionDateK")}
+              readOnly={mode === "view"}
+              className="w-full h-10 border border-gray-300 rounded-lg px-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="deliveryDate" className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              İşin təhvil vaxtı <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="deliveryDate"
+              type="date"
+              {...register("deliveryDate", { required: true })}
+              readOnly={mode === "view"}
+              className="w-full h-10 border border-gray-300 rounded-lg px-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
             />
           </div>
         </div>
       </div>
 
-      {/* Conditional Tooth Selection - QAPAQ üçün */}
-      {renderToothFields && (
-        <div className="flex flex-col border border-[#E5E7EB] bg-white rounded-lg w-full p-4 gap-2">
-          <h1 className="text-lg font-bold">Diş qrafiki</h1>
-          <h2>Təsirə məruz qalan dişlər və müalicə sahələri</h2>
-          <div className="flex items-center justify-around border border-[#E5E7EB] rounded-lg w-[198px] h-[40px]">
+      {/* FDI Tooth Selection Grid - Exact Paper Form Layout */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-100 pb-3">
+          <div>
+            <h2 className="text-base font-semibold text-gray-800 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+              Diş Qrafiki (FDI)
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">Təsirə məruz qalan dişləri seçin</p>
+          </div>
+
+          <div className="inline-flex p-1 bg-gray-100 rounded-lg border border-gray-200">
             <button
               type="button"
-              className={`w-[90px] h-[32px] rounded-lg ${
-                !isChild ? "bg-[#155EEF] text-white" : ""
+              className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                !isChild ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:text-gray-900"
               }`}
               onClick={() => {
+                if (mode === "view") return;
                 setIsChild(false);
                 setSelectedTeeth([]);
                 setToothDetails([]);
-              }}>
-              {" "}
-              Yetkin{" "}
+              }}
+            >
+              Yetkin
             </button>
             <button
               type="button"
-              className={`w-[90px] h-[32px] rounded-lg ${
-                isChild ? "bg-[#155EEF] text-white" : ""
+              className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                isChild ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:text-gray-900"
               }`}
               onClick={() => {
+                if (mode === "view") return;
                 setIsChild(true);
                 setSelectedTeeth([]);
                 setToothDetails([]);
-              }}>
-              {" "}
-              Uşaq{" "}
+              }}
+            >
+              Uşaq
             </button>
           </div>
-          <div>
-            <ToothSelector
-              showImage={true}
-              selectedTeeth={selectedTeeth}
-              onSelect={handleToothSelect}
-              isChild={isChild}
+        </div>
+
+        {/* 2-Row FDI Teeth Table matching paper document */}
+        <div className="overflow-x-auto py-2">
+          <div className="min-w-[640px] flex flex-col gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+            {/* Upper Teeth Row */}
+            <div className="flex justify-center items-center gap-1 sm:gap-2">
+              <div className="flex gap-1 sm:gap-1.5 pr-3 border-r-2 border-gray-400">
+                {upperRightTeeth.map((num) => {
+                  const active = selectedTeeth.includes(num);
+                  return (
+                    <button
+                      key={num}
+                      type="button"
+                      disabled={mode === "view"}
+                      onClick={() => handleToothToggle(num)}
+                      className={`w-9 h-10 sm:w-10 sm:h-11 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center justify-center border ${
+                        active
+                          ? "bg-blue-600 text-white border-blue-700 ring-2 ring-blue-300 scale-105"
+                          : "bg-white text-gray-800 border-gray-300 hover:border-blue-400 hover:bg-blue-50"
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex gap-1 sm:gap-1.5 pl-3">
+                {upperLeftTeeth.map((num) => {
+                  const active = selectedTeeth.includes(num);
+                  return (
+                    <button
+                      key={num}
+                      type="button"
+                      disabled={mode === "view"}
+                      onClick={() => handleToothToggle(num)}
+                      className={`w-9 h-10 sm:w-10 sm:h-11 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center justify-center border ${
+                        active
+                          ? "bg-blue-600 text-white border-blue-700 ring-2 ring-blue-300 scale-105"
+                          : "bg-white text-gray-800 border-gray-300 hover:border-blue-400 hover:bg-blue-50"
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Divider Line */}
+            <div className="w-full border-t border-gray-300 my-1"></div>
+
+            {/* Lower Teeth Row */}
+            <div className="flex justify-center items-center gap-1 sm:gap-2">
+              <div className="flex gap-1 sm:gap-1.5 pr-3 border-r-2 border-gray-400">
+                {lowerRightTeeth.map((num) => {
+                  const active = selectedTeeth.includes(num);
+                  return (
+                    <button
+                      key={num}
+                      type="button"
+                      disabled={mode === "view"}
+                      onClick={() => handleToothToggle(num)}
+                      className={`w-9 h-10 sm:w-10 sm:h-11 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center justify-center border ${
+                        active
+                          ? "bg-indigo-600 text-white border-indigo-700 ring-2 ring-indigo-300 scale-105"
+                          : "bg-white text-gray-800 border-gray-300 hover:border-indigo-400 hover:bg-indigo-50"
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex gap-1 sm:gap-1.5 pl-3">
+                {lowerLeftTeeth.map((num) => {
+                  const active = selectedTeeth.includes(num);
+                  return (
+                    <button
+                      key={num}
+                      type="button"
+                      disabled={mode === "view"}
+                      onClick={() => handleToothToggle(num)}
+                      className={`w-9 h-10 sm:w-10 sm:h-11 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center justify-center border ${
+                        active
+                          ? "bg-indigo-600 text-white border-indigo-700 ring-2 ring-indigo-300 scale-105"
+                          : "bg-white text-gray-800 border-gray-300 hover:border-indigo-400 hover:bg-indigo-50"
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {selectedTeeth.length > 0 && (
+          <div className="text-xs text-blue-800 bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <span className="font-semibold">Seçilmiş dişlər ({selectedTeeth.length}):</span>{" "}
+            {selectedTeeth.sort((a,b) => a-b).join(", ")}
+          </div>
+        )}
+      </div>
+
+      {/* Materials & Work Specification Section matching paper document:
+          - İşin rəngi
+          - Metal növü
+          - Keramika növü
+          - Metal işi
+          - Keramikanın işi
+          - Hesabat
+      */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
+        <h2 className="text-base font-semibold text-gray-800 border-b border-gray-100 pb-3 flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-green-600"></span>
+          Materiallar və İşin Təfərrüatları
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* İşin rəngi */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              İşin rəngi
+            </label>
+            <CustomDropdown
+              options={colors}
+              value={selectedColor}
+              onChange={(option) => setValue("color", option ? option.value : null)}
+              placeholder="Rəng seçin (məs: A2)"
               disabled={mode === "view"}
             />
           </div>
-          {selectedTeeth.length > 0 && (
-            <div className="mt-4">
-              <h3 className="font-bold mb-2">Diş detalları:</h3>
-              {selectedTeeth.map((toothNumber) => {
-                const toothDetail =
-                  toothDetails.find((d) => d.toothNumber === toothNumber) || {};
-                return (
-                  <div key={toothNumber} className="mb-4 p-2 border rounded">
-                    <h4 className="font-semibold">Diş #{toothNumber}</h4>
-                    <div className="grid grid-cols-3 gap-2 mt-2">
-                      <div>
-                        <label>Rəng:</label>
-                        <CustomDropdown
-                          options={colors}
-                          value={
-                            colors.find(
-                              (c) => c.value === toothDetail.colorId
-                            ) || null
-                          }
-                          onChange={(option) =>
-                            handleToothDetailChange(
-                              toothNumber,
-                              "colorId",
-                              option ? option.value : null
-                            )
-                          }
-                          placeholder="Rəng seçin"
-                          disabled={mode === "view"}
-                        />
-                      </div>
-                      <div>
-                        <label>Keramika:</label>
-                        <CustomDropdown
-                          options={ceramics}
-                          value={
-                            ceramics.find(
-                              (c) => c.value === toothDetail.ceramicId
-                            ) || null
-                          }
-                          onChange={(option) =>
-                            handleToothDetailChange(
-                              toothNumber,
-                              "ceramicId",
-                              option ? option.value : null
-                            )
-                          }
-                          placeholder="Keramika seçin"
-                          disabled={mode === "view"}
-                        />
-                      </div>
-                      <div>
-                        <label>Metal:</label>
-                        <CustomDropdown
-                          options={metals}
-                          value={
-                            metals.find(
-                              (m) => m.value === toothDetail.metalId
-                            ) || null
-                          }
-                          onChange={(option) =>
-                            handleToothDetailChange(
-                              toothNumber,
-                              "metalId",
-                              option ? option.value : null
-                            )
-                          }
-                          placeholder="Metal seçin"
-                          disabled={mode === "view"}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
 
-      {/* Form Actions */}
-      <div className="self-end flex gap-4 m-4">
+          {/* Metal növü */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Metal növü
+            </label>
+            <CustomDropdown
+              options={metals}
+              value={selectedMetal}
+              onChange={(option) => setValue("metal", option ? option.value : null)}
+              placeholder="Metal növünü seçin"
+              disabled={mode === "view"}
+            />
+          </div>
+
+          {/* Keramika növü */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Keramika növü
+            </label>
+            <CustomDropdown
+              options={ceramics}
+              value={selectedCeramic}
+              onChange={(option) => setValue("ceramic", option ? option.value : null)}
+              placeholder="Keramika növünü seçin"
+              disabled={mode === "view"}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          {/* Metal işi */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="metalWork" className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Metal işi
+            </label>
+            <textarea
+              id="metalWork"
+              {...register("metalWork")}
+              readOnly={mode === "view"}
+              rows={3}
+              placeholder="Metal işi təfərrüatları..."
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-all"
+            />
+          </div>
+
+          {/* Keramikanın işi */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="ceramicWork" className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Keramikanın işi
+            </label>
+            <textarea
+              id="ceramicWork"
+              {...register("ceramicWork")}
+              readOnly={mode === "view"}
+              rows={3}
+              placeholder="Keramika işi təfərrüatları..."
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-all"
+            />
+          </div>
+        </div>
+
+        {/* Hesabat (Report / Notes) */}
+        <div className="flex flex-col gap-1.5 pt-2">
+          <label htmlFor="report" className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            Hesabat (Qeydlər)
+          </label>
+          <textarea
+            id="report"
+            {...register("report")}
+            readOnly={mode === "view"}
+            rows={3}
+            placeholder="Hesabat və əlavə qeydlər..."
+            className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-all"
+          />
+        </div>
+
+        {/* Multi-file Attachments */}
+        <div className="flex flex-col gap-1.5 pt-2">
+          <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            Əlavə olunmuş Fayllar / Şəkillər
+          </label>
+          <MultiFileForm
+            onFilesChange={handleFilesChange}
+            disabled={mode === "view"}
+            initialFiles={initialData?.files || []}
+          />
+        </div>
+      </div>
+
+      {/* Form Action Buttons */}
+      <div className="flex justify-end gap-3 pt-2">
         <button
           type="button"
-          className="flex items-center justify-center px-4 py-2 border text-[#155EEF] border-[#155EEF] rounded-lg hover:bg-gray-100 w-[184px] h-[44px] gap-2"
-          onClick={onCancel}>
+          onClick={onCancel}
+          className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold text-sm transition-all flex items-center gap-2"
+        >
           <FontAwesomeIcon icon={faXmark} /> Ləğv et
         </button>
+
         {mode !== "view" && (
           <button
             type="submit"
-            className="flex items-center justify-center px-4 py-2 bg-[#155EEF] text-white rounded-lg hover:bg-[#155EEF] w-[184px] h-[44px] gap-2"
-            disabled={dentalOrderStore.loading}>
-            <FontAwesomeIcon icon={faCheck} />{" "}
-            {dentalOrderStore.loading ? "Yüklənir..." : "Yadda saxla"}
+            disabled={dentalOrderStore.loading}
+            className="px-8 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-all shadow-md flex items-center gap-2 disabled:opacity-50"
+          >
+            <FontAwesomeIcon icon={faCheck} />
+            {dentalOrderStore.loading ? "Yadda saxlanılır..." : "Yadda saxla"}
           </button>
         )}
       </div>

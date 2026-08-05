@@ -8,21 +8,24 @@ import { useNavigate } from "react-router-dom";
 
 function EmployeeAdd() {
     const navigate = useNavigate();
-    const { mutate, isPending, isError, isSuccess } = useCreateWorker();
+    const { mutateAsync, isPending } = useCreateWorker();
 
-    const handleSubmit = (formData) => {
-        mutate(formData);
-    };
-
-    useEffect(() => {
-        if (isError) {
-            toast.error("Xəta baş verdi");
-        }
-        if (isSuccess) {
+    const handleSubmit = async (formData) => {
+        try {
+            await mutateAsync(formData);
             toast.success("Uğurla yaradıldı");
             navigate("/employees");
+        } catch (err) {
+            const serverMessage = err?.response?.data?.message || err?.response?.data || err?.message;
+            console.error("EmployeeAdd submit error:", err);
+            if (serverMessage && typeof serverMessage === 'string') {
+                toast.error(serverMessage);
+            } else {
+                toast.error("Xəta baş verdi");
+            }
+            throw err;
         }
-    }, [isError, isSuccess, navigate]);
+    };
 
     return (
         <div className="relative">

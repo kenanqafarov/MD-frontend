@@ -30,3 +30,23 @@ export const fetchDetailedReports = async ({ criteria, page = 0, size = 10, sign
 
   return response.data;
 };
+
+export const exportDetailedReports = async (criteria) => {
+  const response = await axiosInstance.post("/reports/export/detailed", criteria || {}, {
+    responseType: "blob",
+  });
+  return response.data;
+};
+
+export const exportPaymentsReports = async ({ period, fromDate, toDate }) => {
+  const params = {
+    period: period || "bu_ay",
+    fromDate: fromDate || undefined,
+    toDate: toDate || undefined,
+  };
+  const response = await axiosInstance.get("/reports/export/payments", {
+    params,
+    responseType: "blob",
+  });
+  return response.data;
+};

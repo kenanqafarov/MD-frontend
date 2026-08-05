@@ -102,21 +102,30 @@ const OperationPictures = () => {
           </thead>
           <tbody>
             {filteredOperations.map((row, idx) => (
-              <tr key={row.id}>
+              <tr key={row.id} onClick={handleInfo(row.id, row)} style={{ cursor: "pointer" }}>
                 <td>{idx + 1}</td>
                 <td>{row.operationName}</td>
                 <td>
                   <div className="operationPictures-action-icons">
                     <PiWarningCircleLight
-                      onClick={handleInfo(row.id, row)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleInfo(row.id, row)();
+                      }}
                       className="operationPictures-warning-button"
                     />
                     <FiEdit3
-                      onClick={handleEdit(row.id, row)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(row.id, row)();
+                      }}
                       className="operationPictures-edit-button"
                     />
                     <GoTrash
-                      onClick={() => handleDelete(row.id, row.operationName)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(row.id, row.operationName);
+                      }}
                       className="operationPictures-delete-button"
                     />
                   </div>
