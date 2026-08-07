@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchDashboardReports, fetchDetailedReports, exportDetailedReports, exportPaymentsReports } from "../../api/reports";
+import { fetchDashboardReports, fetchDetailedReports, exportDetailedReports, exportPaymentsReports, fetchLaboratoryReports, exportLaboratoryReports } from "../../api/reports";
 import { toast } from "react-toastify";
 import { HiArrowsUpDown } from "react-icons/hi2";
 import { motion, AnimatePresence } from "framer-motion";
@@ -159,7 +159,7 @@ function ReportsPage() {
     const { operationTypes, fetchAll } = useOperationTypesStore();
     const { operationItemsType, fetchAllOp } = useOperationItemsTypeStore();
 
-    // Navigation tab: 'analitika', 'billing', 'detailed'
+    // Navigation tab: 'analitika', 'billing', 'detailed', 'sifarisler'
     const [activeTab, setActiveTab] = useState('analitika');
     const [selectedPeriod, setSelectedPeriod] = useState('bu_ay');
     const [isLoading, setIsLoading] = useState(false);
@@ -175,6 +175,15 @@ function ReportsPage() {
     const [executorDoctor, setExecutorDoctor] = useState(null);
     const [category, setCategory] = useState(null);
     const [operation, setOperation] = useState(null);
+
+    // Laboratory report states
+    const [labReportData, setLabReportData] = useState(null);
+    const [labOrders, setLabOrders] = useState([]);
+    const [labCurrentPage, setLabCurrentPage] = useState(0);
+    const [labTotalPages, setLabTotalPages] = useState(0);
+    const [labStatus, setLabStatus] = useState('all');
+    const [labCategory, setLabCategory] = useState('all');
+    const [labSearch, setLabSearch] = useState('');
 
     // Backend states
     const [dashboardData, setDashboardData] = useState(null);
@@ -228,6 +237,31 @@ function ReportsPage() {
             setDashboardData(data);
         } catch (error) {
             console.error("Failed to load dashboard data:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const loadLaboratoryReports = async (page = 0) => {
+        setIsLoading(true);
+        try {
+            const data = await fetchLaboratoryReports({
+                period: selectedPeriod,
+                fromDate,
+                toDate,
+                status: labStatus === 'all' ? undefined : labStatus,
+                category: labCategory === 'all' ? undefined : labCategory,
+                search: labSearch || undefined,
+                page,
+                size: 10
+            });
+            setLabReportData(data);
+            setLabOrders(data.content || []);
+            setLabCurrentPage(data.page || 0);
+            setLabTotalPages(data.totalPages || 0);
+        } catch (error) {
+            console.error("Failed to load laboratory reports:", error);
+            toast.error("Laboratoriya hesabatı yüklənərkən xəta baş verdi.");
         } finally {
             setIsLoading(false);
         }
@@ -288,6 +322,16 @@ function ReportsPage() {
                 };
                 blobData = await exportDetailedReports(criteria);
                 fileName = "etraflı_log_hesabatı.xlsx";
+            } else if (activeTab === "sifarisler") {
+                blobData = await exportLaboratoryReports({
+                    period: selectedPeriod,
+                    fromDate,
+                    toDate,
+                    status: labStatus === 'all' ? undefined : labStatus,
+                    category: labCategory === 'all' ? undefined : labCategory,
+                    search: labSearch || undefined
+                });
+                fileName = "laboratoriya_sifarisleri_hesabati.xlsx";
             } else {
                 blobData = await exportPaymentsReports({
                     period: selectedPeriod,
@@ -317,22 +361,26 @@ function ReportsPage() {
     useEffect(() => {
         if (activeTab === 'detailed') {
             loadDetailedReports(0);
+        } else if (activeTab === 'sifarisler') {
+            loadLaboratoryReports(0);
         } else {
             loadDashboard();
         }
-    }, [activeTab, selectedPeriod, fromDate, toDate]);
+    }, [activeTab, selectedPeriod, fromDate, toDate, labStatus, labCategory]);
 
     // Real-time synchronization polling every 30 seconds
     useEffect(() => {
         const interval = setInterval(() => {
             if (activeTab === 'detailed') {
                 loadDetailedReports(currentPage);
+            } else if (activeTab === 'sifarisler') {
+                loadLaboratoryReports(labCurrentPage);
             } else {
                 loadDashboard();
             }
         }, 30000);
         return () => clearInterval(interval);
-    }, [activeTab, selectedPeriod, fromDate, toDate, currentPage]);
+    }, [activeTab, selectedPeriod, fromDate, toDate, currentPage, labCurrentPage, labStatus, labCategory]);
 
     const handlePeriodChange = (val) => {
         setSelectedPeriod(val);
@@ -341,6 +389,8 @@ function ReportsPage() {
     const triggerRefresh = () => {
         if (activeTab === 'detailed') {
             loadDetailedReports(currentPage);
+        } else if (activeTab === 'sifarisler') {
+            loadLaboratoryReports(labCurrentPage);
         } else {
             loadDashboard();
         }
@@ -348,6 +398,20 @@ function ReportsPage() {
 
     const handleDetailedSearch = () => {
         loadDetailedReports(0);
+    };
+
+    const handleLabSearch = () => {
+        loadLaboratoryReports(0);
+    };
+
+    const handleLabReset = () => {
+        setLabStatus('all');
+        setLabCategory('all');
+        setLabSearch('');
+        const d = new Date();
+        d.setDate(d.getDate() - 30);
+        setFromDate(d.toISOString().split('T')[0]);
+        setToDate(new Date().toISOString().split('T')[0]);
     };
 
     const defaultDashboardData = {
@@ -487,6 +551,36 @@ function ReportsPage() {
         );
     };
 
+    const renderBreakdownSection = (title, dataMap, color = "bg-purple-500") => {
+        if (!dataMap || Object.keys(dataMap).length === 0) {
+            return (
+                <div className="py-8 text-center text-gray-400 text-xs">Məlumat tapılmadı</div>
+            );
+        }
+        const total = Object.values(dataMap).reduce((sum, val) => sum + val, 0);
+        return (
+            <div className="space-y-3.5">
+                <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">{title}</p>
+                <div className="space-y-3">
+                    {Object.entries(dataMap).map(([key, value], i) => {
+                        const pct = total > 0 ? (value / total) * 100 : 0;
+                        return (
+                            <div key={i} className="flex flex-col gap-1.5">
+                                <div className="flex justify-between items-center text-xs font-semibold">
+                                    <span className="text-gray-700 truncate max-w-[180px]">{key}</span>
+                                    <span className="text-gray-950 font-bold">{value} ({pct.toFixed(0)}%)</span>
+                                </div>
+                                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                    <div className={`${color} h-full rounded-full`} style={{ width: `${pct}%` }} />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="reportsPageWrapper min-h-screen bg-[#F8FAFC] p-6 text-gray-800">
             {/* Header section */}
@@ -549,6 +643,15 @@ function ReportsPage() {
                         }`}
                 >
                     📋 Ətraflı Log Hesabatı
+                </button>
+                <button
+                    onClick={() => setActiveTab("sifarisler")}
+                    className={`px-5 py-2.5 text-xs md:text-sm font-semibold rounded-xl transition-all ${activeTab === "sifarisler"
+                        ? "bg-white text-pink-600 shadow-md border border-gray-100"
+                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                        }`}
+                >
+                    🔬 Laboratoriya Sifarişləri
                 </button>
             </div>
 
@@ -1150,6 +1253,212 @@ function ReportsPage() {
                                             </div>
                                         );
                                     })()}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TAB 4: LABORATORY ORDERS TAB */}
+                        {activeTab === 'sifarisler' && (
+                            <div className="space-y-6 animate-fadeIn">
+                                {/* 4 KPI Cards */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                                    <div className="bg-white rounded-2xl border-l-4 border-pink-500 shadow-sm p-5 border border-gray-100 hover:shadow-md transition-all">
+                                        <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">ÜMUMİ SİFARİŞ SAYI</p>
+                                        <h3 className="text-3xl font-extrabold text-gray-900 mt-2">{labReportData?.totalOrders || 0}</h3>
+                                        <p className="text-xs text-gray-400 mt-1 font-medium">Laboratoriya sifarişləri</p>
+                                    </div>
+
+                                    <div className="bg-white rounded-2xl border-l-4 border-emerald-500 shadow-sm p-5 border border-gray-100 hover:shadow-md transition-all">
+                                        <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">ÜMUMİ MƏBLƏĞ</p>
+                                        <h3 className="text-3xl font-extrabold text-emerald-600 mt-2">₼{(labReportData?.totalAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
+                                        <p className="text-xs text-gray-400 mt-1 font-medium">Sifarişlərin cəm məbləği</p>
+                                    </div>
+
+                                    <div className="bg-white rounded-2xl border-l-4 border-blue-500 shadow-sm p-5 border border-gray-100 hover:shadow-md transition-all">
+                                        <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">ORTALAMA SİFARİŞ MƏBLƏĞİ</p>
+                                        <h3 className="text-3xl font-extrabold text-blue-600 mt-2">₼{(labReportData?.avgAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
+                                        <p className="text-xs text-gray-400 mt-1 font-medium">Bir sifarişin ortalama qiyməti</p>
+                                    </div>
+
+                                    <div className="bg-white rounded-2xl border-l-4 border-amber-500 shadow-sm p-5 border border-gray-100 hover:shadow-md transition-all relative">
+                                        <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">TAMAMLANMIŞ SİFARİŞLƏR</p>
+                                        <h3 className="text-3xl font-extrabold text-amber-600 mt-2">{labReportData?.completedOrders || 0}</h3>
+                                        <p className="text-xs text-gray-400 mt-1 font-medium">READY statusunda olanlar</p>
+                                    </div>
+                                </div>
+
+                                {/* Timeline and breakdowns */}
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                                    {/* Timeline Chart */}
+                                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm lg:col-span-7 flex flex-col justify-between">
+                                        <div>
+                                            <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">TARİX ÜZRƏ SİFARİŞ DİNAMİKASI</p>
+                                            <h4 className="text-2xl font-extrabold text-gray-900 mt-1">Sifariş sayı (Dövr üzrə)</h4>
+                                        </div>
+                                        <div className="mt-6">
+                                            {renderLineChart(labReportData?.timelineData || [])}
+                                        </div>
+                                    </div>
+
+                                    {/* Status Breakdown */}
+                                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm lg:col-span-5 flex flex-col justify-between">
+                                        {renderBreakdownSection("STATUSLARA GÖRƏ SİFARİŞLƏR", labReportData?.statusBreakdown || {}, "bg-pink-500")}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                                    {/* Category Breakdown */}
+                                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm lg:col-span-6">
+                                        {renderBreakdownSection("KATEQORİYALARA GÖRƏ SİFARİŞLƏR", labReportData?.categoryBreakdown || {}, "bg-blue-500")}
+                                    </div>
+
+                                    {/* Technician Breakdown */}
+                                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm lg:col-span-6">
+                                        {renderBreakdownSection("LABORATORİYALARA (TEXNİKLƏRƏ) GÖRƏ SİFARİŞLƏR", labReportData?.technicianBreakdown || {}, "bg-emerald-500")}
+                                    </div>
+                                </div>
+
+                                {/* Search Panel wrapper */}
+                                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                                    <p className="text-sm font-bold text-gray-900 mb-4">Sifariş Siyahısı Axtarış və Filterləri</p>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Status</label>
+                                            <CustomDropdown
+                                                value={labStatus}
+                                                onChange={(option) => setLabStatus(option.value)}
+                                                options={[
+                                                    { value: 'all', label: 'Bütün statuslar' },
+                                                    { value: 'PENDING', label: 'PENDING' },
+                                                    { value: 'SENT', label: 'SENT' },
+                                                    { value: 'READY', label: 'READY' }
+                                                ]}
+                                                placeholder="Status seçin"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">İşin Növü (Kateqoriya)</label>
+                                            <CustomDropdown
+                                                value={labCategory}
+                                                onChange={(option) => setLabCategory(option.value)}
+                                                options={[
+                                                    { value: 'all', label: 'Bütün növlər' },
+                                                    { value: 'QAPAQ', label: 'Qapaq / Metal-Keramika' },
+                                                    { value: 'PROTEZ', label: 'Protez' },
+                                                    { value: 'IMPLANT', label: 'İmplant Üstü' },
+                                                    { value: 'ZIRKON', label: 'Zirkon' }
+                                                ]}
+                                                placeholder="İşin növü"
+                                            />
+                                        </div>
+                                        <div className="lg:col-span-2">
+                                            <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Axtarış (Mətn)</label>
+                                            <input
+                                                value={labSearch}
+                                                type="text"
+                                                onChange={(e) => setLabSearch(e.target.value)}
+                                                placeholder="Pasiyent, Həkim, Texnik və ya açıqlama..."
+                                                className="w-full text-xs border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-1 focus:ring-pink-500 bg-white"
+                                            />
+                                        </div>
+                                        <div className="flex items-end gap-2">
+                                            <button
+                                                onClick={handleLabReset}
+                                                className="w-1/2 h-10 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-xl transition-all"
+                                            >
+                                                Sıfırla
+                                            </button>
+                                            <button
+                                                onClick={handleLabSearch}
+                                                className="w-1/2 h-10 flex items-center justify-center gap-1.5 bg-pink-600 hover:bg-pink-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-all"
+                                            >
+                                                <IoIosSearch className="text-sm" /> Axtar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Table wrapper */}
+                                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left text-xs">
+                                            <thead className="bg-[#EEF2F6]">
+                                                <tr className="text-gray-700 font-bold border-b border-gray-100">
+                                                    <th className="p-3.5 text-center w-12 border-r border-[#CDD5DF]">№</th>
+                                                    <th className="p-3.5">Giriş tarixi</th>
+                                                    <th className="p-3.5">Təhvil tarixi</th>
+                                                    <th className="p-3.5">Həkim</th>
+                                                    <th className="p-3.5">Texnik (Laboratoriya)</th>
+                                                    <th className="p-3.5">Pasiyent</th>
+                                                    <th className="p-3.5 text-center">İşin növü</th>
+                                                    <th className="p-3.5 text-center">Status</th>
+                                                    <th className="p-3.5 text-right">Məbləğ</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100 text-gray-600 font-medium">
+                                                {labOrders.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="9" className="p-8 text-center text-gray-400 font-semibold">
+                                                            Məlumat tapılmadı
+                                                        </td>
+                                                    </tr>
+                                                ) : (
+                                                    labOrders.map((item, index) => (
+                                                        <tr key={index} className="hover:bg-gray-50/70 transition-all">
+                                                            <td className="p-3.5 text-center border-r border-[#CDD5DF] font-bold text-gray-900">{index + 1 + labCurrentPage * 10}</td>
+                                                            <td className="p-3.5">{item.checkDate ? item.checkDate : "-"}</td>
+                                                            <td className="p-3.5">{item.deliveryDate ? item.deliveryDate : "-"}</td>
+                                                            <td className="p-3.5 font-bold text-gray-900">{item.doctor}</td>
+                                                            <td className="p-3.5 font-bold text-gray-900">{item.technician}</td>
+                                                            <td className="p-3.5 font-bold text-gray-900">{item.patient}</td>
+                                                            <td className="p-3.5 text-center font-bold text-purple-600">{item.dentalWorkType}</td>
+                                                            <td className="p-3.5 text-center">
+                                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                                                    item.dentalWorkStatus === 'READY' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                                                                    item.dentalWorkStatus === 'SENT' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                                                                    'bg-amber-50 text-amber-700 border border-amber-200'
+                                                                }`}>
+                                                                    {item.dentalWorkStatus}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-3.5 text-right font-bold text-emerald-600">₼{item.price ? Number(item.price).toLocaleString('en-US', { minimumFractionDigits: 2 }) : "0.00"}</td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Pagination Controls */}
+                                    {labTotalPages > 1 && (
+                                        <div className="flex justify-between items-center p-4 border-t border-gray-100 bg-gray-50/50">
+                                            <button
+                                                disabled={labCurrentPage === 0}
+                                                onClick={() => loadLaboratoryReports(labCurrentPage - 1)}
+                                                className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-all"
+                                            >
+                                                Əvvəlki
+                                            </button>
+                                            <span className="text-xs text-gray-500 font-medium font-sans">
+                                                Səhifə {labCurrentPage + 1} / {labTotalPages}
+                                            </span>
+                                            <button
+                                                disabled={labCurrentPage >= labTotalPages - 1}
+                                                onClick={() => loadLaboratoryReports(labCurrentPage + 1)}
+                                                className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-all"
+                                            >
+                                                Növbəti
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Summary row */}
+                                    <div className="bg-gray-50 p-4 border-t border-gray-100 flex justify-end gap-12 text-xs font-bold text-gray-700">
+                                        <p className="text-gray-500">Yekun Cəmlər:</p>
+                                        <p>Toplam Sifariş: <span className="text-gray-950 ml-1">{labReportData?.totalOrders || 0}</span></p>
+                                        <p>Toplam Məbləğ: <span className="text-emerald-600 ml-1">₼{(labReportData?.totalAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></p>
+                                    </div>
                                 </div>
                             </div>
                         )}

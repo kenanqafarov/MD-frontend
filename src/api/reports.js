@@ -50,3 +50,38 @@ export const exportPaymentsReports = async ({ period, fromDate, toDate }) => {
   });
   return response.data;
 };
+
+export const fetchLaboratoryReports = async ({ period, fromDate, toDate, status, category, search, page = 0, size = 10, signal }) => {
+  const params = {
+    period: period || "bu_ay",
+    fromDate: fromDate || undefined,
+    toDate: toDate || undefined,
+    status: status || undefined,
+    category: category || undefined,
+    search: search || undefined,
+    page,
+    size
+  };
+  const response = await axiosInstance.get("/reports/laboratory", {
+    params,
+    signal,
+  });
+  return response.data;
+};
+
+export const exportLaboratoryReports = async ({ period, fromDate, toDate, status, category, search }) => {
+  const params = {
+    period: period || "bu_ay",
+    fromDate: fromDate || undefined,
+    toDate: toDate || undefined,
+    status: status || undefined,
+    category: category || undefined,
+    search: search || undefined
+  };
+  const response = await axiosInstance.get("/reports/export/laboratory", {
+    params,
+    responseType: "blob",
+  });
+  return response.data;
+};
+
