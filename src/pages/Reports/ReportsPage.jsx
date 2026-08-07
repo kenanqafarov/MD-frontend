@@ -32,6 +32,7 @@ import CustomDropdown from '../../components/CustomDropdown';
 import useGeneralCalendarStore from '../../../stores/appointments';
 import usePriceCategoryStore from '../../../stores/priceCategoryStore';
 import useOperationTypesStore from '../../../stores/operationsTypeStore';
+import useOperationItemsTypeStore from '../../../stores/operationItemTypeStore';
 
 // Mock database mapping periods to numbers and listings
 const periodData = {
@@ -156,6 +157,7 @@ function ReportsPage() {
     const { doctors, fetchDoctors } = useGeneralCalendarStore();
     const { categories, fetchCategories } = usePriceCategoryStore();
     const { operationTypes, fetchAll } = useOperationTypesStore();
+    const { operationItemsType, fetchAllOp } = useOperationItemsTypeStore();
 
     // Navigation tab: 'analitika', 'billing', 'detailed'
     const [activeTab, setActiveTab] = useState('analitika');
@@ -190,20 +192,29 @@ function ReportsPage() {
         fetchAll();
     }, [fetchDoctors, fetchCategories, fetchAll]);
 
+    // Kateqoriya dəyişəndə alt kateqoriyaları (əməliyyatları) gətir
+    useEffect(() => {
+        if (category) {
+            fetchAllOp(category);
+        }
+    }, [category, fetchAllOp]);
+
     // Format fetched data for dropdowns
     const formattedDoctors = doctors.map(doctor => ({
         value: doctor.name + " " + doctor.surname,
         label: doctor.name + " " + doctor.surname
     }));
 
-    const formattedCategories = categories.map(cat => ({
-        value: cat.id,
-        label: cat.name
+    // Kateqoriya dropdown-u üçün ana kateqoriyalar (operationTypes)
+    const formattedCategories = operationTypes.map(op => ({
+        value: op.id,
+        label: op.categoryName
     }));
 
-    const formattedOperations = operationTypes.map(op => ({
-        value: op.categoryName,
-        label: op.categoryName
+    // Əməliyyat dropdown-u üçün seçilmiş kateqoriyanın alt kateqoriyaları
+    const formattedOperations = operationItemsType.map(item => ({
+        value: item.name,
+        label: item.name
     }));
 
     const loadDashboard = async () => {
@@ -225,8 +236,9 @@ function ReportsPage() {
     const loadDetailedReports = async (page = 0) => {
         setIsLoading(true);
         try {
-            const selectedCategoryObj = categories.find(c => String(c.id) === String(category));
-            const categoryName = selectedCategoryObj ? selectedCategoryObj.name : (category || undefined);
+            // Seçilmiş kateqoriyanın adını tap
+            const selectedCategoryObj = operationTypes.find(op => String(op.id) === String(category));
+            const categoryName = selectedCategoryObj ? selectedCategoryObj.categoryName : (category || undefined);
 
             const criteria = {
                 plannerDoctor: plannerDoctor || undefined,
@@ -263,8 +275,8 @@ function ReportsPage() {
             let fileName = "maliyyə_hesabatı.xlsx";
 
             if (activeTab === "detailed") {
-                const selectedCategoryObj = categories.find(c => String(c.id) === String(category));
-                const categoryName = selectedCategoryObj ? selectedCategoryObj.name : (category || undefined);
+                const selectedCategoryObj = operationTypes.find(op => String(op.id) === String(category));
+                const categoryName = selectedCategoryObj ? selectedCategoryObj.categoryName : (category || undefined);
 
                 const criteria = {
                     plannerDoctor: plannerDoctor || undefined,
@@ -982,7 +994,10 @@ function ReportsPage() {
                                             <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Kateqoriya</label>
                                             <CustomDropdown
                                                 value={category}
-                                                onChange={(option) => setCategory(option.value)}
+                                                onChange={(option) => {
+                                                    setCategory(option.value);
+                                                    setOperation(null); // alt kateqoriyanı sıfırla
+                                                }}
                                                 options={formattedCategories}
                                                 placeholder="Kateqoriya"
                                             />
@@ -993,7 +1008,7 @@ function ReportsPage() {
                                                 value={operation}
                                                 onChange={(option) => setOperation(option.value)}
                                                 options={formattedOperations}
-                                                placeholder="Əməliyyat"
+                                                placeholder={category ? "Əməliyyat seçin" : "Əvvəl kateqoriya seçin"}
                                             />
                                         </div>
                                         <div>

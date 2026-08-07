@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark, faCheck, faTooth } from "@fortawesome/free-solid-svg-icons";
 import CustomDropdown from "./CustomDropdown";
 import MultiFileForm from "./MultiFileForm";
+import ToothShadeSelector from "./ToothShadeSelector";
 import useDentalOrderStore from "../../stores/dentalOrderStore";
 import { readAllTeeth, createTooth } from "../api/teeth";
 
@@ -108,6 +109,8 @@ const OrderForm = ({
   const [toothDetails, setToothDetails] = useState(
     initialData?.toothDetailIds || []
   );
+  // shadeZones: { [toothNumber]: { CROWN: colorId|null, MIDDLE: colorId|null, GUM: colorId|null } }
+  const [shadeZones, setShadeZones] = useState({});
   const [files, setFiles] = useState([]);
 
   // Initialize stores
@@ -160,6 +163,31 @@ const OrderForm = ({
       setIsChild(
         initialData.isChild !== undefined ? initialData.isChild : false
       );
+
+      // Edit mode-da mövcud shade zone-larını yüklə
+      // toothDetails-dən toothSection məlumatını bərpa et
+      if (initialData.toothDetails && initialData.toothDetails.length > 0) {
+        const restoredZones = {};
+        // Tooth number sırası ilə toothDetails-i eşlə
+        teethList.forEach((t, idx) => {
+          const toothNo = typeof t === 'object' ? t.toothNo : t;
+          // Həmin diş üçün bütün detail-ları tap (CROWN, MIDDLE, GUM)
+          const detailsForTooth = initialData.toothDetails.filter((d, di) => {
+            // Əgər toothSection varsa onu istifadə et
+            if (d.toothSection) return true; // hamısı bu diş üçün ola bilər
+            return di === idx; // fallback: index-ə görə
+          });
+          const zones = { CROWN: null, MIDDLE: null, GUM: null };
+          detailsForTooth.forEach(d => {
+            const sec = d.toothSection || 'CROWN';
+            if (zones[sec] !== undefined) {
+              zones[sec] = d.colorId || null;
+            }
+          });
+          restoredZones[toothNo] = zones;
+        });
+        setShadeZones(restoredZones);
+      }
     } else {
       // Set default current date for orderDate if creating new
       setValue("orderDate", formatDate(new Date()));
@@ -273,6 +301,19 @@ const OrderForm = ({
       }
     }
     setToothDetails(updatedDetails.filter((d) => updatedTeeth.includes(d.toothNumber)));
+
+    // Diş silinəndə shade zone-ları da sil
+    if (isSelected) {
+      setShadeZones(prev => {
+        const updated = { ...prev };
+        delete updated[toothNum];
+        return updated;
+      });
+    }
+  };
+
+  const handleShadeZoneChange = (toothNum, zones) => {
+    setShadeZones(prev => ({ ...prev, [toothNum]: zones }));
   };
 
   const handleToothDetailChange = (toothNumber, field, value) => {
@@ -337,18 +378,37 @@ const OrderForm = ({
         }
       }
 
-      // Prepare tooth detail IDs matching resolved teeth IDs
-      const toothDetailIds = resolvedTeethIds.map((teethId) => {
+      // Prepare tooth detail IDs — shade zones daxil
+      // Hər diş üçün: əgər shadeZones varsa 3 ayrı entry (CROWN/MIDDLE/GUM),
+      // əgər yoxdursa köhnə üsulla (ümumi rəng + metal + keramika)
+      const toothDetailIds = [];
+
+      resolvedTeethIds.forEach((teethId) => {
         const dbTooth = currentDbTeeth.find((t) => Number(t.id) === Number(teethId));
         const toothNo = dbTooth ? dbTooth.toothNo : null;
         const localDetail = toothDetails.find((d) => Number(d.toothNumber) === Number(toothNo)) || {};
-
-        const colorId = localDetail.colorId ? Number(localDetail.colorId) : (data.color ? Number(data.color) : null);
         const metalId = localDetail.metalId ? Number(localDetail.metalId) : (data.metal ? Number(data.metal) : null);
         const ceramicId = localDetail.ceramicId ? Number(localDetail.ceramicId) : (data.ceramic ? Number(data.ceramic) : null);
 
-        return { colorId, metalId, ceramicId };
-      }).filter((detail) => detail.colorId !== null || detail.metalId !== null || detail.ceramicId !== null);
+        const zones = shadeZones[toothNo];
+        const hasZones = zones && (zones.CROWN || zones.MIDDLE || zones.GUM);
+
+        if (hasZones) {
+          // Hər zona üçün ayrıca entry
+          ["CROWN", "MIDDLE", "GUM"].forEach((section) => {
+            const colorId = zones[section] ? Number(zones[section]) : null;
+            if (colorId || metalId || ceramicId) {
+              toothDetailIds.push({ colorId, metalId, ceramicId, toothSection: section });
+            }
+          });
+        } else {
+          // Zone seçilməyibsə ümumi rəng ilə köhnə üsul
+          const colorId = localDetail.colorId ? Number(localDetail.colorId) : (data.color ? Number(data.color) : null);
+          if (colorId !== null || metalId !== null || ceramicId !== null) {
+            toothDetailIds.push({ colorId, metalId, ceramicId, toothSection: null });
+          }
+        }
+      });
 
       // Construct description with full paper form fields
       const descriptionLines = [];
@@ -763,6 +823,38 @@ const OrderForm = ({
           </div>
         )}
       </div>
+
+      {/* Diş Rəngi Seçimi — Hər diş üçün zona-bazlı shade */}
+      {selectedTeeth.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
+          <div className="border-b border-gray-100 pb-3">
+            <h2 className="text-base font-semibold text-gray-800 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+              Diş Rəngi (Shade) Seçimi
+            </h2>
+            <p className="text-xs text-gray-500 mt-1">
+              Hər dişin üzərindəki hissəyə klik edərək fərqli shade seçin — Tac (üst), Orta, Diş əti (aşağı)
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {selectedTeeth.sort((a, b) => a - b).map((toothNum) => (
+              <div
+                key={toothNum}
+                className="bg-gray-50 rounded-xl border border-gray-200 p-3 hover:border-purple-200 transition-colors"
+              >
+                <ToothShadeSelector
+                  colors={colors}
+                  shadeZones={shadeZones[toothNum] || {}}
+                  onChange={(zones) => handleShadeZoneChange(toothNum, zones)}
+                  disabled={mode === "view"}
+                  toothNumber={toothNum}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Materials & Work Specification Section matching paper document:
           - İşin rəngi

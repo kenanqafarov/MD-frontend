@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import * as XLSX from "xlsx";
 
 // Style
 import "../../assets/style/LaboratoryPage/sentorders.css";
@@ -18,6 +19,8 @@ function SentOrders() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [excelLoading, setExcelLoading] = useState(false);
+  const [exportMessage, setExportMessage] = useState(null);
 
   const { technicOrders, loading, error, fetchTechnicOrders } =
     useDentalOrderStore();
@@ -35,6 +38,79 @@ function SentOrders() {
       className: "info-icon",
     },
   ];
+
+  // Export mesajını müvəqqəti göstər
+  const showExportMessage = (type, text) => {
+    setExportMessage({ type, text });
+    setTimeout(() => setExportMessage(null), 4000);
+  };
+
+  // Tarix formatı: DD.MM.YYYY
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return String(dateStr);
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      return `${day}.${month}.${year}`;
+    } catch {
+      return String(dateStr);
+    }
+  };
+
+  // Excel eksport funksiyası
+  const exportToExcel = async () => {
+    if (filteredData.length === 0) {
+      showExportMessage("info", "Export etmək üçün sifariş yoxdur");
+      return;
+    }
+
+    setExcelLoading(true);
+    setExportMessage(null);
+
+    try {
+      const rows = filteredData.map((row, index) => ({
+        "№": index + 1,
+        "Sifariş ID": row.id ?? "-",
+        "Həkim": row.doctor || "-",
+        "Pasiyent": row.patient || "-",
+        "Sifariş tipi": row.dentalWorkType || "-",
+        "Status": getStatusInfo(row.dentalWorkStatus).text,
+        "Tarix": formatDate(row.createdAt || row.date || row.orderDate),
+        "Texnik": row.technician || "-",
+        "Qeyd": row.note || row.description || "-",
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+
+      // Sütun genişlikləri
+      worksheet["!cols"] = [
+        { wch: 5 },
+        { wch: 12 },
+        { wch: 25 },
+        { wch: 25 },
+        { wch: 25 },
+        { wch: 25 },
+        { wch: 14 },
+        { wch: 22 },
+        { wch: 35 },
+      ];
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Laboratoriya Sifarişləri");
+
+      const today = new Date();
+      const dateStr = today.toISOString().split("T")[0];
+      XLSX.writeFile(workbook, `laboratoriya-sifarisleri-${dateStr}.xlsx`);
+    } catch (err) {
+      console.error("Excel export xətası:", err);
+      showExportMessage("error", "Excel hazırlanarkən xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.");
+    } finally {
+      setExcelLoading(false);
+    }
+  };
 
   // Status badge məlumatı
   const getStatusInfo = (status) => {
@@ -132,12 +208,25 @@ function SentOrders() {
           >
             <FaPlus className="plusBTN" /> Yenisini əlavə et
           </p>
-          <FiDownload
-            className="exportDataNow"
-            onClick={() => navigate("/data/export")}
-          />
+          <button
+            className="export-excel-btn"
+            onClick={exportToExcel}
+            disabled={excelLoading}
+            title="Excel-ə export et"
+          >
+            <FiDownload style={{ fontSize: "15px" }} />
+            {excelLoading ? "Excel hazırlanır..." : "Excel-ə export et"}
+          </button>
         </div>
       </div>
+
+      {/* Export mesajı */}
+      {exportMessage && (
+        <div className={`export-message export-message--${exportMessage.type}`}>
+          {exportMessage.text}
+        </div>
+      )}
+
       <div className="tableWrapper">
         <table className="labTable w-full" style={{ tableLayout: "fixed" }}>
           <thead>
@@ -232,6 +321,5 @@ function SentOrders() {
     </div>
   );
 }
-
 
 export default SentOrders;
