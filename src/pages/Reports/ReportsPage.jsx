@@ -222,9 +222,12 @@ function ReportsPage() {
 
     // Əməliyyat dropdown-u üçün seçilmiş kateqoriyanın alt kateqoriyaları
     const formattedOperations = operationItemsType.map(item => ({
-        value: item.name,
-        label: item.name
+        value: item.operationName,
+        label: item.operationName
     }));
+
+    const selectedCategoryOption = formattedCategories.find(opt => String(opt.value) === String(category)) || null;
+    const selectedOperationOption = formattedOperations.find(opt => opt.value === operation) || null;
 
     const loadDashboard = async () => {
         setIsLoading(true);
@@ -1096,7 +1099,7 @@ function ReportsPage() {
                                         <div>
                                             <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Kateqoriya</label>
                                             <CustomDropdown
-                                                value={category}
+                                                value={selectedCategoryOption}
                                                 onChange={(option) => {
                                                     setCategory(option.value);
                                                     setOperation(null); // alt kateqoriyanı sıfırla
@@ -1108,7 +1111,7 @@ function ReportsPage() {
                                         <div>
                                             <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Əməliyyat</label>
                                             <CustomDropdown
-                                                value={operation}
+                                                value={selectedOperationOption}
                                                 onChange={(option) => setOperation(option.value)}
                                                 options={formattedOperations}
                                                 placeholder={category ? "Əməliyyat seçin" : "Əvvəl kateqoriya seçin"}
