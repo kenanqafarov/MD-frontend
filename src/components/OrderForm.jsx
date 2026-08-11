@@ -146,6 +146,55 @@ const OrderForm = ({
   // Reset form when initialData changes
   useEffect(() => {
     if (initialData) {
+      // Fallback extraction from toothDetails if root fields are missing
+      let extractedColor = null;
+      let extractedMetal = null;
+      let extractedCeramic = null;
+      if (initialData.toothDetails && initialData.toothDetails.length > 0) {
+        const withColor = initialData.toothDetails.find(d => d.colorId);
+        if (withColor) extractedColor = Number(withColor.colorId);
+
+        const withMetal = initialData.toothDetails.find(d => d.metalId);
+        if (withMetal) extractedMetal = Number(withMetal.metalId);
+
+        const withCeramic = initialData.toothDetails.find(d => d.ceramicId);
+        if (withCeramic) extractedCeramic = Number(withCeramic.ceramicId);
+      }
+
+      // Fallback parsing of description for metalWork, ceramicWork, and report
+      let metalWork = initialData.metalWork || "";
+      let ceramicWork = initialData.ceramicWork || "";
+      let report = initialData.report || "";
+      const rawDesc = initialData.description || initialData.notes || "";
+      if (!metalWork && !ceramicWork && !report && rawDesc) {
+        if (rawDesc.includes(" | ")) {
+          const parts = rawDesc.split(" | ");
+          let parsedMetal = "";
+          let parsedCeramic = "";
+          let parsedReport = "";
+          parts.forEach(part => {
+            if (part.startsWith("Metal işi: ")) {
+              parsedMetal = part.replace("Metal işi: ", "");
+            } else if (part.startsWith("Keramikanın işi: ")) {
+              parsedCeramic = part.replace("Keramikanın işi: ", "");
+            } else if (part.startsWith("Hesabat: ")) {
+              parsedReport = part.replace("Hesabat: ", "");
+            }
+          });
+          if (parsedMetal || parsedCeramic || parsedReport) {
+            metalWork = parsedMetal;
+            ceramicWork = parsedCeramic;
+            report = parsedReport;
+          } else {
+            report = rawDesc;
+          }
+        } else {
+          report = rawDesc;
+        }
+      } else if (!report && rawDesc) {
+        report = rawDesc;
+      }
+
       const formattedData = {
         ...initialData,
         orderDate: formatDate(initialData.orderDate || new Date()),
@@ -160,12 +209,12 @@ const OrderForm = ({
         technician: initialData.technicianId || initialData.technician,
         patient: initialData.patientId || initialData.patient,
         workType: initialData.dentalWorkType || "QAPAQ",
-        metalWork: initialData.metalWork || "",
-        ceramicWork: initialData.ceramicWork || "",
-        report: initialData.description || initialData.notes || initialData.report || "",
-        color: initialData.orderDentureInfo?.color || initialData.color ? Number(initialData.orderDentureInfo?.color || initialData.color) : null,
-        metal: initialData.metalId || initialData.metal ? Number(initialData.metalId || initialData.metal) : null,
-        ceramic: initialData.ceramicId || initialData.ceramic ? Number(initialData.ceramicId || initialData.ceramic) : null,
+        metalWork: metalWork,
+        ceramicWork: ceramicWork,
+        report: report,
+        color: initialData.orderDentureInfo?.color || initialData.colorId || initialData.color ? Number(initialData.orderDentureInfo?.color || initialData.colorId || initialData.color) : (extractedColor || null),
+        metal: initialData.metalId || initialData.metal ? Number(initialData.metalId || initialData.metal) : (extractedMetal || null),
+        ceramic: initialData.ceramicId || initialData.ceramic ? Number(initialData.ceramicId || initialData.ceramic) : (extractedCeramic || null),
         garniture: initialData.orderDentureInfo?.garniture ? Number(initialData.orderDentureInfo?.garniture) : null,
       };
       reset(formattedData);
@@ -1302,7 +1351,7 @@ const OrderForm = ({
               options={colors}
               value={selectedColor}
               onChange={(option) => setValue("color", option ? option.value : null)}
-              placeholder="Rəng seçin (məs: A2)"
+              placeholder={mode === "view" ? "Məlumat yoxdur" : "Rəng seçin (məs: A2)"}
               disabled={mode === "view"}
             />
           </div>
@@ -1316,7 +1365,7 @@ const OrderForm = ({
               options={metals}
               value={selectedMetal}
               onChange={(option) => setValue("metal", option ? option.value : null)}
-              placeholder="Metal növünü seçin"
+              placeholder={mode === "view" ? "Məlumat yoxdur" : "Metal növünü seçin"}
               disabled={mode === "view"}
             />
           </div>
@@ -1330,7 +1379,7 @@ const OrderForm = ({
               options={ceramics}
               value={selectedCeramic}
               onChange={(option) => setValue("ceramic", option ? option.value : null)}
-              placeholder="Keramika növünü seçin"
+              placeholder={mode === "view" ? "Məlumat yoxdur" : "Keramika növünü seçin"}
               disabled={mode === "view"}
             />
           </div>
@@ -1347,7 +1396,7 @@ const OrderForm = ({
               {...register("metalWork")}
               readOnly={mode === "view"}
               rows={3}
-              placeholder="Metal işi təfərrüatları..."
+              placeholder={mode === "view" ? "Məlumat yoxdur" : "Metal işi təfərrüatları..."}
               className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-all"
             />
           </div>
@@ -1362,7 +1411,7 @@ const OrderForm = ({
               {...register("ceramicWork")}
               readOnly={mode === "view"}
               rows={3}
-              placeholder="Keramika işi təfərrüatları..."
+              placeholder={mode === "view" ? "Məlumat yoxdur" : "Keramika işi təfərrüatları..."}
               className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-all"
             />
           </div>
@@ -1378,7 +1427,7 @@ const OrderForm = ({
             {...register("report")}
             readOnly={mode === "view"}
             rows={3}
-            placeholder="Hesabat və əlavə qeydlər..."
+            placeholder={mode === "view" ? "Məlumat yoxdur" : "Hesabat və əlavə qeydlər..."}
             className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-all"
           />
         </div>
@@ -1388,11 +1437,15 @@ const OrderForm = ({
           <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
             Əlavə olunmuş Fayllar / Şəkillər
           </label>
-          <MultiFileForm
-            onFilesChange={handleFilesChange}
-            disabled={mode === "view"}
-            initialFiles={initialData?.files || []}
-          />
+          {mode === "view" && (!initialData?.urls || initialData.urls.length === 0) && (!initialData?.files || initialData.files.length === 0) ? (
+            <div className="text-sm text-gray-500 italic p-3 bg-gray-50 border border-gray-200 rounded-lg">Məlumat yoxdur</div>
+          ) : (
+            <MultiFileForm
+              onFilesChange={handleFilesChange}
+              mode={mode === "view" ? "info" : "edit"}
+              initialFiles={initialData?.urls || initialData?.files || []}
+            />
+          )}
         </div>
       </div>
 
