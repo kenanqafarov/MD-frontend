@@ -76,7 +76,7 @@ function SentOrders() {
         "Sifariş ID": row.id ?? "-",
         "Həkim": row.doctor || "-",
         "Pasiyent": row.patient || "-",
-        "Sifariş tipi": row.dentalWorkType || "-",
+        "Sifariş tipi": row.isBridge ? `Körpü (${row.startTooth}-${row.endTooth})` : (row.dentalWorkType || "-"),
         "Status": getStatusInfo(row.dentalWorkStatus).text,
         "Tarix": formatDate(row.createdAt || row.date || row.orderDate),
         "Texnik": row.technician || "-",
@@ -282,7 +282,7 @@ function SentOrders() {
                     >
                       {row.patient || "-"}
                     </td>
-                    <td className="px-4">{row.dentalWorkType || "-"}</td>
+                    <td className="px-4">{row.isBridge ? `Körpü (${row.startTooth}-${row.endTooth})` : (row.dentalWorkType || "-")}</td>
                     <td className="!text-center px-4">
                       <span className={`status ${statusInfo.type}`}>
                         {statusInfo.text}

@@ -112,21 +112,26 @@ const useDentalOrderStore = create((set) => ({
         dentalWorkStatus: statusData.dentalWorkStatus,
       };
 
-      const updatedOrder = await updateDentalOrderStatus(updateData);
-
+      await updateDentalOrderStatus(updateData);
+ 
       // Əmin olun ki, UI dərhal yenilənir
       set((state) => ({
         orders: state.orders.map((order) =>
-          order.id === updatedOrder.id
-            ? { ...order, dentalWorkStatus: updatedOrder.dentalWorkStatus }
+          Number(order.id) === Number(updateData.id)
+            ? { ...order, dentalWorkStatus: updateData.dentalWorkStatus }
+            : order
+        ),
+        technicOrders: state.technicOrders.map((order) =>
+          Number(order.id) === Number(updateData.id)
+            ? { ...order, dentalWorkStatus: updateData.dentalWorkStatus }
             : order
         ),
         loading: false,
         error: null,
       }));
-
-      console.log("Status successfully updated:", updatedOrder);
-      return updatedOrder;
+ 
+      console.log("Status successfully updated locally for ID:", updateData.id);
+      return updateData;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || error.message || "Xəta baş verdi";
