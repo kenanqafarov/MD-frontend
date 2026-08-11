@@ -13,8 +13,10 @@ const ToothSelector = ({ selectedTeeth, onSelect, showImage = true, mode = "edit
   ] : [
     85, 84, 83, 82, 81, 71, 72, 73, 74,75
   ];
-console.log("s");
 
+  const getToothImageUrl = (tooth) => {
+    return new URL(`../assets/images/teeth/${tooth}.png`, import.meta.url).href;
+  };
 
   return (
     <div className="flex justify-center items-center">
@@ -25,7 +27,7 @@ console.log("s");
           <div key={tooth} className="tooth-item">
             {showImage && (
               <img
-                src={`/src/assets/images/teeth/${tooth}.png`} // Example path for tooth images
+                src={getToothImageUrl(tooth)}
                 alt={`Tooth ${tooth}`}
                 className="tooth-image"
                 loading="lazy"
@@ -50,7 +52,7 @@ console.log("s");
           <div key={tooth} className="tooth-item">
             {showImage && (
               <img
-                src={`/src/assets/images/teeth/${tooth}.png`} // Example path for tooth images
+                src={getToothImageUrl(tooth)}
                 alt={`Tooth ${tooth}`}
                 className="tooth-image"
                 loading="lazy"
