@@ -63,6 +63,7 @@ const Plans = () => {
 
   const {
     createPatientTreatment: createPatientTreatmentFromStore,
+    savePatientTreatment: savePatientTreatmentFromStore,
     readPatientTreatmentByPlanMainId: readPatientTreatmentByPlanMainIdFromStore,
     readCategoryAndOperationsByPlanMainId: readCategoryAndOperationsByPlanMainIdFromStore,
     selectedCategoryAndOperationItems,
@@ -241,36 +242,40 @@ const Plans = () => {
   
   const selectedOperationInfo = getSelectedOperationInfo();
   
-  // Planı təsdiqləmə funksiyası
+  // Müalicəni təsdiqləmə funksiyası
   const handleConfirmPlan = async () => {
     if (!selectedPlanId) {
       message.warning('Zəhmət olmasa plan seçin');
       return;
     }
 
+    if (!patientPlansData || patientPlansData.length === 0) {
+      message.warning('Müalicə üçün heç bir plan elementi yoxdur');
+      return;
+    }
+
     setConfirmingPlan(true);
     try {
-      const result = await savePatientPlanFromStore(selectedPlanId);
+      const checkedPlanIds = patientPlansData.map(item => item.patientPlanId).filter(Boolean);
+      if (checkedPlanIds.length === 0) {
+        message.warning('Seçilmiş plan elementləri tapılmadı');
+        setConfirmingPlan(false);
+        return;
+      }
+
+      const result = await savePatientTreatmentFromStore({ checkedPlanIds });
       
       if (result.success && result.status === 200) {
-        message.success('Plan uğurla təsdiqləndi!');
-        // Patient plans datayı yenilə
-        setLoadingPatientPlans(true);
-        const plansResult = await readPatientTreatmentByPlanMainIdFromStore(selectedPlanId);
-        if (plansResult.success && plansResult.status === 200) {
-          // Yeni response strukturuna görə: { key, patientPlanMainId, isSave, plans: [...] }
-          const plansArray = plansResult.data?.plans || plansResult.data;
-          setPatientPlansData(Array.isArray(plansArray) ? plansArray : []);
-        }
-        setLoadingPatientPlans(false);
+        message.success('Müalicə uğurla təsdiqləndi!');
+        navigate(`/patients/patient/${patientId}/report`);
       } else {
         const status = result.status || result.error?.response?.status;
-        const errorMessage = result.error?.response?.data?.message || 'Plan təsdiqlənərkən xəta baş verdi';
+        const errorMessage = result.error?.response?.data?.message || 'Müalicə təsdiqlənərkən xəta baş verdi';
         message.error(`Xəta (Status: ${status}): ${errorMessage}`);
       }
     } catch (error) {
-      console.error('Plan təsdiqləmə xətası:', error);
-      message.error(error.response?.data?.message || 'Plan təsdiqlənərkən xəta baş verdi');
+      console.error('Müalicə təsdiqləmə xətası:', error);
+      message.error(error.response?.data?.message || 'Müalicə təsdiqlənərkən xəta baş verdi');
     } finally {
       setConfirmingPlan(false);
     }

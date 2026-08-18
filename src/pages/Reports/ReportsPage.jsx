@@ -159,6 +159,14 @@ function ReportsPage() {
     const { operationTypes, fetchAll } = useOperationTypesStore();
     const { operationItemsType, fetchAllOp } = useOperationItemsTypeStore();
 
+    // Helper to get local date string (YYYY-MM-DD)
+    const getLocalDateString = (d) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     // Navigation tab: 'analitika', 'billing', 'detailed', 'sifarisler'
     const [activeTab, setActiveTab] = useState('analitika');
     const [selectedPeriod, setSelectedPeriod] = useState('bu_ay');
@@ -166,9 +174,9 @@ function ReportsPage() {
     const [fromDate, setFromDate] = useState(() => {
         const d = new Date();
         d.setDate(d.getDate() - 30);
-        return d.toISOString().split('T')[0];
+        return getLocalDateString(d);
     });
-    const [toDate, setToDate] = useState(() => new Date().toISOString().split('T')[0]);
+    const [toDate, setToDate] = useState(() => getLocalDateString(new Date()));
 
     // Detailed view states (Original filters)
     const [plannerDoctor, setPlannerDoctor] = useState(null);
@@ -369,7 +377,7 @@ function ReportsPage() {
         } else {
             loadDashboard();
         }
-    }, [activeTab, selectedPeriod, fromDate, toDate, labStatus, labCategory]);
+    }, [activeTab, selectedPeriod, fromDate, toDate, labStatus, labCategory, plannerDoctor, executorDoctor, category, operation, labSearch]);
 
     // Real-time synchronization polling every 30 seconds
     useEffect(() => {
@@ -383,7 +391,7 @@ function ReportsPage() {
             }
         }, 30000);
         return () => clearInterval(interval);
-    }, [activeTab, selectedPeriod, fromDate, toDate, currentPage, labCurrentPage, labStatus, labCategory]);
+    }, [activeTab, selectedPeriod, fromDate, toDate, currentPage, labCurrentPage, labStatus, labCategory, plannerDoctor, executorDoctor, category, operation, labSearch]);
 
     const handlePeriodChange = (val) => {
         setSelectedPeriod(val);
@@ -413,8 +421,8 @@ function ReportsPage() {
         setLabSearch('');
         const d = new Date();
         d.setDate(d.getDate() - 30);
-        setFromDate(d.toISOString().split('T')[0]);
-        setToDate(new Date().toISOString().split('T')[0]);
+        setFromDate(getLocalDateString(d));
+        setToDate(getLocalDateString(new Date()));
     };
 
     const defaultDashboardData = {
@@ -446,16 +454,34 @@ function ReportsPage() {
         professionals: []
     };
 
-    const activeData = dashboardData || periodData[selectedPeriod] || defaultDashboardData;
+    const rawActiveData = dashboardData || periodData[selectedPeriod] || defaultDashboardData;
+    const activeData = {
+        ...defaultDashboardData,
+        ...rawActiveData,
+        collectionsChart: rawActiveData.collectionsChart || [],
+        doctorsProduction: rawActiveData.doctorsProduction || [],
+        paymentsMethod: rawActiveData.paymentsMethod || [],
+        overdueInvoices: rawActiveData.overdueInvoices || [],
+        professionals: rawActiveData.professionals || [],
+    };
 
     const formatDate = (timestamp) => {
         if (!timestamp) return "-";
-        const date = new Date(timestamp);
-        return date.toLocaleDateString("az-AZ", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric"
-        });
+        try {
+            if (Array.isArray(timestamp)) {
+                const [year, month, day] = timestamp;
+                return `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;
+            }
+            // If it's a string in YYYY-MM-DD or other format
+            const date = new Date(timestamp);
+            if (isNaN(date.getTime())) return String(timestamp);
+            const day = String(date.getDate()).padStart(2, "0");
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
+        } catch {
+            return String(timestamp);
+        }
     };
 
     // Helper to draw a custom SVG line chart path smoothly
@@ -469,7 +495,9 @@ function ReportsPage() {
 
         const maxVal = Math.max(...chartData.map(d => d.value)) * 1.15 || 100;
         const points = chartData.map((d, index) => {
-            const x = padding + (index / (chartData.length - 1)) * graphWidth;
+            const x = chartData.length > 1
+                ? padding + (index / (chartData.length - 1)) * graphWidth
+                : padding + graphWidth / 2;
             const y = height - padding - (d.value / maxVal) * graphHeight;
             return { x, y };
         });
@@ -537,7 +565,9 @@ function ReportsPage() {
                 ))}
                 {/* X Axis Labels */}
                 {chartData.map((d, i) => {
-                    const x = padding + (i / (chartData.length - 1)) * graphWidth;
+                    const x = chartData.length > 1
+                        ? padding + (i / (chartData.length - 1)) * graphWidth
+                        : padding + graphWidth / 2;
                     return (
                         <text
                             key={i}
@@ -1148,8 +1178,8 @@ function ReportsPage() {
                                                 setOperation(null);
                                                 const d = new Date();
                                                 d.setDate(d.getDate() - 30);
-                                                setFromDate(d.toISOString().split('T')[0]);
-                                                setToDate(new Date().toISOString().split('T')[0]);
+                                                setFromDate(getLocalDateString(d));
+                                                setToDate(getLocalDateString(new Date()));
                                             }}
                                             className="px-4 py-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-xl transition-all"
                                         >
@@ -1410,8 +1440,8 @@ function ReportsPage() {
                                                     labOrders.map((item, index) => (
                                                         <tr key={index} className="hover:bg-gray-50/70 transition-all">
                                                             <td className="p-3.5 text-center border-r border-[#CDD5DF] font-bold text-gray-900">{index + 1 + labCurrentPage * 10}</td>
-                                                            <td className="p-3.5">{item.checkDate ? item.checkDate : "-"}</td>
-                                                            <td className="p-3.5">{item.deliveryDate ? item.deliveryDate : "-"}</td>
+                                                            <td className="p-3.5">{formatDate(item.checkDate)}</td>
+                                                            <td className="p-3.5">{formatDate(item.deliveryDate)}</td>
                                                             <td className="p-3.5 font-bold text-gray-900">{item.doctor}</td>
                                                             <td className="p-3.5 font-bold text-gray-900">{item.technician}</td>
                                                             <td className="p-3.5 font-bold text-gray-900">{item.patient}</td>
