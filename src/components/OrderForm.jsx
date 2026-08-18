@@ -452,6 +452,16 @@ const OrderForm = ({
     setShadeZones(prev => ({ ...prev, [toothNum]: zones }));
   };
 
+  const handleBridgeShadeChange = (zones) => {
+    setShadeZones(prev => {
+      const updated = { ...prev };
+      selectedTeeth.forEach((toothNum) => {
+        updated[toothNum] = zones;
+      });
+      return updated;
+    });
+  };
+
   const handleToothDetailChange = (toothNumber, field, value) => {
     const updatedDetails = toothDetails.map((detail) =>
       detail.toothNumber === toothNumber
@@ -1304,26 +1314,41 @@ const OrderForm = ({
               Diş Rəngi (Shade) Seçimi
             </h2>
             <p className="text-xs text-gray-500 mt-1">
-              Hər dişin üzərindəki hissəyə klik edərək fərqli shade seçin — Tac (üst), Orta, Diş əti (aşağı)
+              {selectionMode === "bridge" 
+                ? "Körpü üçün shade seçin (bütün körpü dişlərinə tətbiq olunacaq) — Tac (üst), Orta, Diş əti (aşağı)"
+                : "Hər dişin üzərindəki hissəyə klik edərək fərqli shade seçin — Tac (üst), Orta, Diş əti (aşağı)"}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {selectedTeeth.sort((a, b) => a - b).map((toothNum) => (
-              <div
-                key={toothNum}
-                className="bg-gray-50 rounded-xl border border-gray-200 p-3 hover:border-purple-200 transition-colors"
-              >
-                <ToothShadeSelector
-                  colors={colors}
-                  shadeZones={shadeZones[toothNum] || {}}
-                  onChange={(zones) => handleShadeZoneChange(toothNum, zones)}
-                  disabled={mode === "view"}
-                  toothNumber={toothNum}
-                />
-              </div>
-            ))}
-          </div>
+          {selectionMode === "bridge" ? (
+            <div className="bg-gray-50 rounded-xl border border-purple-200 p-4">
+              <ToothShadeSelector
+                colors={colors}
+                shadeZones={selectedTeeth.length > 0 ? (shadeZones[selectedTeeth[0]] || {}) : {}}
+                onChange={handleBridgeShadeChange}
+                disabled={mode === "view"}
+                isBridge={true}
+                bridgeTeeth={selectedTeeth.sort((a, b) => a - b)}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {selectedTeeth.sort((a, b) => a - b).map((toothNum) => (
+                <div
+                  key={toothNum}
+                  className="bg-gray-50 rounded-xl border border-gray-200 p-3 hover:border-purple-200 transition-colors"
+                >
+                  <ToothShadeSelector
+                    colors={colors}
+                    shadeZones={shadeZones[toothNum] || {}}
+                    onChange={(zones) => handleShadeZoneChange(toothNum, zones)}
+                    disabled={mode === "view"}
+                    toothNumber={toothNum}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

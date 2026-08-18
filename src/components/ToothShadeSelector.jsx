@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 /**
  * Dental shade rəng xəritəsi — shade adına görə real rəngi qaytarır
@@ -166,8 +166,18 @@ const ShadePalette = ({ colors, selectedColorId, onSelect, zone, onClose }) => {
  *  - onChange: (zones) => void
  *  - disabled: boolean
  *  - toothNumber: number
+ *  - isBridge: boolean
+ *  - bridgeTeeth: Array<number>
  */
-const ToothShadeSelector = ({ colors = [], shadeZones = {}, onChange, disabled = false, toothNumber }) => {
+const ToothShadeSelector = ({
+  colors = [],
+  shadeZones = {},
+  onChange,
+  disabled = false,
+  toothNumber,
+  isBridge = false,
+  bridgeTeeth = []
+}) => {
   const [activeZone, setActiveZone] = useState(null);
 
   const colorMap = {};
@@ -194,28 +204,57 @@ const ToothShadeSelector = ({ colors = [], shadeZones = {}, onChange, disabled =
   const zoneHoverBorder = { CROWN: "border-gray-200 hover:border-blue-300 hover:bg-blue-50/40", MIDDLE: "border-gray-200 hover:border-amber-300 hover:bg-amber-50/40", GUM: "border-gray-200 hover:border-red-300 hover:bg-red-50/40" };
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex gap-3 items-start">
+    <div className="flex flex-col gap-3 w-full">
+      <div className="flex flex-col sm:flex-row gap-4 items-start w-full">
         {/* Diş SVG */}
-        <div className="flex flex-col items-center gap-1 flex-shrink-0">
-          {toothNumber && (
-            <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
-              #{toothNumber}
+        {isBridge ? (
+          <div className="flex flex-col items-center gap-2 border border-purple-100 bg-purple-50/20 rounded-xl p-3 relative min-w-[240px] max-w-full overflow-x-auto flex-shrink-0">
+            <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full shadow-sm">
+              Körpü Dişləri ({bridgeTeeth.length} diş)
             </span>
-          )}
-          <div className="w-14 h-24 sm:w-16 sm:h-28">
-            <ToothSVG
-              shadeZones={shadeZones}
-              colorMap={colorMap}
-              onZoneClick={handleZoneClick}
-              activeZone={activeZone}
-              disabled={disabled}
-            />
+            <div className="flex items-center justify-center gap-1.5 py-3 px-4 relative bg-white rounded-lg border border-gray-200 shadow-inner min-w-[220px] min-h-[110px]">
+              {/* Bridge connector bar passing through the teeth */}
+              <div className="absolute top-[48%] left-4 right-4 h-3.5 bg-indigo-500/20 border-y border-indigo-400/30 rounded-full pointer-events-none z-0" />
+              {bridgeTeeth.map((num) => (
+                <div key={num} className="w-11 h-20 sm:w-13 sm:h-24 relative flex flex-col items-center z-10 hover:scale-105 transition-transform">
+                  <span className="text-[9px] font-bold text-gray-400 mb-0.5">#{num}</span>
+                  <ToothSVG
+                    shadeZones={shadeZones}
+                    colorMap={colorMap}
+                    onZoneClick={handleZoneClick}
+                    activeZone={activeZone}
+                    disabled={disabled}
+                  />
+                </div>
+              ))}
+            </div>
+            {!disabled && (
+              <span className="text-[9px] text-gray-400 text-center leading-tight">
+                Hər hansı dişin üzərinə klik edərək shade seçin
+              </span>
+            )}
           </div>
-          {!disabled && (
-            <span className="text-[9px] text-gray-400 text-center leading-tight max-w-[60px]">klik edərək seç</span>
-          )}
-        </div>
+        ) : (
+          <div className="flex flex-col items-center gap-1 flex-shrink-0">
+            {toothNumber && (
+              <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
+                #{toothNumber}
+              </span>
+            )}
+            <div className="w-14 h-24 sm:w-16 sm:h-28">
+              <ToothSVG
+                shadeZones={shadeZones}
+                colorMap={colorMap}
+                onZoneClick={handleZoneClick}
+                activeZone={activeZone}
+                disabled={disabled}
+              />
+            </div>
+            {!disabled && (
+              <span className="text-[9px] text-gray-400 text-center leading-tight max-w-[60px]">klik edərək seç</span>
+            )}
+          </div>
+        )}
 
         {/* Zona siyahısı */}
         <div className="flex flex-col gap-1.5 flex-1 min-w-0">
