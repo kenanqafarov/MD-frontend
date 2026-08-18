@@ -670,7 +670,17 @@ const OrderForm = ({
   const lowerLeftTeeth = isChild ? CHILD_LOWER_LEFT : ADULT_LOWER_LEFT;
 
   const handlePrint = () => {
+    const originalTitle = document.title;
+    const patientName = selectedPatient?.label || "Xəstə";
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    const formattedDate = `${day}.${month}.${year}`;
+
+    document.title = `${patientName} - ${formattedDate}`;
     window.print();
+    document.title = originalTitle;
   };
 
   const PrintArea = () => {
