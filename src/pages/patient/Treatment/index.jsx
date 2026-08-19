@@ -114,8 +114,8 @@ const Plans = () => {
     try {
       const result = await deletePlansFromStore(planId);
       
-      // Sadece başarılı olduğunda (200 status) state güncelle
-      if (result.success && result.status === 200) {
+      // Sadece başarılı olduğunda (200 veya 201 status) state güncelle
+      if (result.success && (result.status === 200 || result.status === 201)) {
         const updatedPlans = plans.filter(plan => plan.id !== planId);
         setPlans(updatedPlans);
         // Əgər yalnız 1 plan qalıbsa, onu seç, yoxsa seçimi sıfırla
@@ -133,7 +133,7 @@ const Plans = () => {
         if (updatedPlans.length === 1) {
           setLoadingPatientPlans(true);
           const plansResult = await readPatientTreatmentByPlanMainIdFromStore(updatedPlans[0].id);
-          if (plansResult.success && plansResult.status === 200) {
+          if (plansResult.success && (plansResult.status === 200 || plansResult.status === 201)) {
             // Yeni response strukturuna görə: { key, patientPlanMainId, isSave, plans: [...] }
             const plansArray = plansResult.data?.plans || plansResult.data;
             setPatientPlansData(Array.isArray(plansArray) ? plansArray : []);
@@ -265,7 +265,7 @@ const Plans = () => {
 
       const result = await savePatientTreatmentFromStore({ checkedPlanIds });
       
-      if (result.success && result.status === 200) {
+      if (result.success && (result.status === 200 || result.status === 201)) {
         message.success('Müalicə uğurla təsdiqləndi!');
         navigate(`/patients/patient/${patientId}/report`);
       } else {
@@ -300,7 +300,7 @@ const Plans = () => {
 
       const result = await createPatientPlanFromStore(payload);
       
-      if (result.success && result.status === 200) {
+      if (result.success && (result.status === 200 || result.status === 201)) {
         message.success('Diş uğurla göndərildi!');
         // Sadece diş seçimini temizle, categoryCode ve operationCode'u qoru
         setSelectedToothData(null);
@@ -309,7 +309,7 @@ const Plans = () => {
         // Patient plans datayı getir
         setLoadingPatientPlans(true);
         const plansResult = await readPatientTreatmentByPlanMainIdFromStore(selectedPlanId);
-        if (plansResult.success && plansResult.status === 200) {
+        if (plansResult.success && (plansResult.status === 200 || plansResult.status === 201)) {
           // Yeni response strukturuna görə: { key, patientPlanMainId, isSave, plans: [...] }
           const plansArray = plansResult.data?.plans || plansResult.data;
           setPatientPlansData(Array.isArray(plansArray) ? plansArray : []);
@@ -343,7 +343,7 @@ const Plans = () => {
     const loadPlans = async () => {
       if (patientId) {
         const result = await fetchPlansFromStore(Number(patientId));
-        if (result.success && result.status === 200) {
+        if (result.success && (result.status === 200 || result.status === 201)) {
 
           // API'den gelen planları state'e ekle
           const formattedPlans = Array.isArray(result.data) 
@@ -501,7 +501,7 @@ const Plans = () => {
         if (selectedPlanId) {
           setLoadingPatientPlans(true);
           const result = await readPatientTreatmentByPlanMainIdFromStore(selectedPlanId);
-          if (result.success && result.status === 200) {
+          if (result.success && (result.status === 200 || result.status === 201)) {
             // Yeni response strukturuna görə: { key, patientPlanMainId, isSave, plans: [...] }
             const plansArray = result.data?.plans || result.data;
             setPatientPlansData(Array.isArray(plansArray) ? plansArray : []);
@@ -901,12 +901,12 @@ const Plans = () => {
                   setDeletingPlanItem(true);
                   try {
                     const result = await deletePatientPlanItemFromStore(id);
-                    if (result.success && result.status === 200) {
+                    if (result.success && (result.status === 200 || result.status === 201)) {
                       message.success('Əməliyyat uğurla silindi!');
                       // Patient plans datayı yenilə
                       setLoadingPatientPlans(true);
                       const plansResult = await readPatientTreatmentByPlanMainIdFromStore(selectedPlanId);
-                      if (plansResult.success && plansResult.status === 200) {
+                      if (plansResult.success && (plansResult.status === 200 || plansResult.status === 201)) {
                         // Yeni response strukturuna görə: { key, patientPlanMainId, isSave, plans: [...] }
                         const plansArray = plansResult.data?.plans || plansResult.data;
                         setPatientPlansData(Array.isArray(plansArray) ? plansArray : []);
