@@ -5,12 +5,18 @@ import { GoTrash } from "react-icons/go";
 import { HiOutlineArrowsUpDown } from "react-icons/hi2";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-
 import useMedicineStore from "../../../stores/medicineStore";
+import { usePermission } from "../../hooks/usePermission";
 
 function MedicinesList() {
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Reseptlər", "CREATE");
+  const canUpdate = hasPermission("Reseptlər", "UPDATE");
+  const canDelete = hasPermission("Reseptlər", "DELETE");
+  const canStatus = hasPermission("Reseptlər", "STATUS");
 
   const {
     medicines,
@@ -84,11 +90,13 @@ function MedicinesList() {
           </div>
         </div>
         <div className="medicinesCategoryRightPart">
-          <Link to={`add`}>
-            <p className="addNewMedicineCategory">
-              <span>+</span> Yenisini əlavə et
-            </p>
-          </Link>
+          {canCreate && (
+            <Link to={`add`}>
+              <p className="addNewMedicineCategory">
+                <span>+</span> Yenisini əlavə et
+              </p>
+            </Link>
+          )}
           <button onClick={downloadExcel}>
             <FiDownload className="exportMedicinesCategoriesData" />
           </button>
@@ -118,7 +126,7 @@ function MedicinesList() {
                   <HiOutlineArrowsUpDown className="arrowIconsNow" /> Status
                 </span>
               </th>
-              <th>Düzəliş</th>
+              {(canUpdate || canDelete) && <th>Düzəliş</th>}
             </tr>
           </thead>
           <tbody>
@@ -130,8 +138,8 @@ function MedicinesList() {
                   <td>{row.description || "-"}</td>
                   <td>
                     <span
-                      onClick={() => toggleStatus(row)}
-                      style={{ cursor: "pointer" }}
+                      onClick={() => canStatus && toggleStatus(row)}
+                      style={{ cursor: canStatus ? "pointer" : "default" }}
                       className={`statusBadge ${
                         row.status === "ACTIVE" ? "active" : "passive"
                       }`}
@@ -140,18 +148,24 @@ function MedicinesList() {
                       {row.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                     </span>
                   </td>
-                  <td>
-                    <div className="medicinesActionIcons">
-                      <FiEdit3
-                        className="editBtn"
-                        onClick={() => handleEdit(row)}
-                      />
-                      <GoTrash
-                        className="deleteBtn"
-                        onClick={() => handleDelete(row)}
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="medicinesActionIcons">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="editBtn"
+                            onClick={() => handleEdit(row)}
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="deleteBtn"
+                            onClick={() => handleDelete(row)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (

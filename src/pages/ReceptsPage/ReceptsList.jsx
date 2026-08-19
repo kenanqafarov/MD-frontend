@@ -7,10 +7,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useRecipeStore from "../../../stores/receptsStore";
 import useMedicineStore from "../../../stores/medicineStore";
+import { usePermission } from "../../hooks/usePermission";
 
 function ReceptsList() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Reseptlər", "CREATE");
+  const canUpdate = hasPermission("Reseptlər", "UPDATE");
+  const canDelete = hasPermission("Reseptlər", "DELETE");
+  const canStatus = hasPermission("Reseptlər", "STATUS");
   const { recipes, fetchRecipes, deleteRecipeById, exportExcel, updateStatus } =
     useRecipeStore();
   const { medicines, fetchMedicines } = useMedicineStore();
@@ -76,9 +83,11 @@ function ReceptsList() {
           </div>
         </div>
         <div className="receptsList-actions">
-          <Link to={"./add"} className="receptsList-add-new-button">
-            <span>+</span> Yenisini əlavə et
-          </Link>
+          {canCreate && (
+            <Link to={"./add"} className="receptsList-add-new-button">
+              <span>+</span> Yenisini əlavə et
+            </Link>
+          )}
           <button className="receptsList-download-button" onClick={exportExcel}>
             <FiDownload className="receptsList-download-icon" />
           </button>
@@ -115,9 +124,11 @@ function ReceptsList() {
                   Status
                 </span>
               </th>
-              <th>
-                <span className="!flex !justify-center">Düzəliş</span>
-              </th>
+              {(canUpdate || canDelete) && (
+                <th>
+                  <span className="!flex !justify-center">Düzəliş</span>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -132,8 +143,8 @@ function ReceptsList() {
                 </td>
                 <td className="!text-center">
                   <span
-                    onClick={() => toggleStatus(row)}
-                    style={{ cursor: "pointer" }}
+                    onClick={() => canStatus && toggleStatus(row)}
+                    style={{ cursor: canStatus ? "pointer" : "default" }}
                     className={`receptsList-status-badge ${
                       row.status === "ACTIVE" ? "active" : "passive"
                     }`}
@@ -142,18 +153,24 @@ function ReceptsList() {
                     {row.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                   </span>
                 </td>
-                <td>
-                  <div className="receptsList-action-icons !flex !justify-center">
-                    <FiEdit3  
-                      className="receptsList-edit-button"
-                      onClick={() => handleEdit(row.id)}
-                    />
-                    <GoTrash
-                      className="receptsList-delete-button"
-                      onClick={() => handleDelete(row.id)}
-                    />
-                  </div>
-                </td>
+                {(canUpdate || canDelete) && (
+                  <td>
+                    <div className="receptsList-action-icons !flex !justify-center">
+                      {canUpdate && (
+                        <FiEdit3  
+                          className="receptsList-edit-button"
+                          onClick={() => handleEdit(row.id)}
+                        />
+                      )}
+                      {canDelete && (
+                        <GoTrash
+                          className="receptsList-delete-button"
+                          onClick={() => handleDelete(row.id)}
+                        />
+                      )}
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

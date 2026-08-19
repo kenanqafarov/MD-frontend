@@ -14,11 +14,17 @@ import "../../assets/style/Specialities/specialities.css";
 // Libraries
 import { Link } from 'react-router-dom';
 import useSpecializationStore from "../../../stores/useSpecializationStore";
+import { usePermission } from "../../hooks/usePermission";
 
 function Specialities() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("İxtisaslar", "CREATE");
+  const canUpdate = hasPermission("İxtisaslar", "UPDATE");
+  const canDelete = hasPermission("İxtisaslar", "DELETE");
 
   // Zustand store'dan məlumatları və funksiyaları götürürük
   const { 
@@ -85,9 +91,11 @@ function Specialities() {
           </div>
         </div>
         <div className="rightPart">
-          <Link className="addSpeciality" to={'add'}>
-            <IoMdAdd className="addSpecialityIcon" /> Yenisini əlavə et
-          </Link>
+          {canCreate && (
+            <Link className="addSpeciality" to={'add'}>
+              <IoMdAdd className="addSpecialityIcon" /> Yenisini əlavə et
+            </Link>
+          )}
           <Link className="exportSpecialities">
             <FiDownload className="exportSpecialitiesIcon" />
           </Link>
@@ -109,7 +117,7 @@ function Specialities() {
                   <HiOutlineArrowsUpDown className='arrowIconsNow' /> Status
                 </span>
               </th>
-              <th>Düzəliş</th>
+              {(canUpdate || canDelete) && <th>Düzəliş</th>}
             </tr>
           </thead>
           <tbody>
@@ -122,12 +130,14 @@ function Specialities() {
                     {row.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                   </span>
                 </td>
-                <td>
-                  <div className="actionIcons">
-                    <FiEdit3 className="editBtn" onClick={() => handleEdit(row)} />
-                    <GoTrash className="deleteBtn" onClick={() => handleDelete(row.id, row.name)} />
-                  </div>
-                </td>
+                {(canUpdate || canDelete) && (
+                  <td>
+                    <div className="actionIcons">
+                      {canUpdate && <FiEdit3 className="editBtn" onClick={() => handleEdit(row)} />}
+                      {canDelete && <GoTrash className="deleteBtn" onClick={() => handleDelete(row.id, row.name)} />}
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

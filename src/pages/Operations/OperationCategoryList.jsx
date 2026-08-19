@@ -6,9 +6,16 @@ import { GoTrash } from "react-icons/go";
 import { HiOutlineArrowsUpDown } from "react-icons/hi2";
 import { Link, useNavigate } from "react-router-dom";
 import useOperationTypesStore from "../../../stores/operationsTypeStore";
+import { usePermission } from "../../hooks/usePermission";
 
 const OperationCategoryList = () => {
   const navigate = useNavigate();
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Əməliyyat növləri", "CREATE");
+  const canUpdate = hasPermission("Əməliyyat növləri", "UPDATE");
+  const canDelete = hasPermission("Əməliyyat növləri", "DELETE");
+  const canStatus = hasPermission("Əməliyyat növləri", "STATUS");
   
   // Filter state
   const [searchTerm, setSearchTerm] = useState("");
@@ -97,9 +104,11 @@ const OperationCategoryList = () => {
           </div>
         </div>
         <div className="operationsList-actions">
-          <Link to={"./add"} className="operationsList-add-new-button">
-            <span>+</span> Yenisini əlavə et
-          </Link>
+          {canCreate && (
+            <Link to={"./add"} className="operationsList-add-new-button">
+              <span>+</span> Yenisini əlavə et
+            </Link>
+          )}
           <button className="operationsList-download-button">
             <FiDownload className="operationsList-download-icon" />
           </button>
@@ -145,9 +154,11 @@ const OperationCategoryList = () => {
                     Status
                   </span>
                 </th>
-                <th className="!flex !justify-center">
-                  <span>Düzəliş</span>
-                </th>
+                {(canUpdate || canDelete) && (
+                  <th className="!flex !justify-center">
+                    <span>Düzəliş</span>
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -161,8 +172,8 @@ const OperationCategoryList = () => {
                     </Link>
                   </td>
                   <td
-                    onClick={() => handleStatusToggle(row)}
-                    style={{ cursor: "pointer" }}
+                    onClick={() => canStatus && handleStatusToggle(row)}
+                    style={{ cursor: canStatus ? "pointer" : "default" }}
                     className="!text-center"
                   >
                     <span
@@ -173,18 +184,24 @@ const OperationCategoryList = () => {
                       {formatStatus(row.status)}
                     </span>
                   </td>
-                  <td>
-                    <div className="operationsList-action-icons !flex !justify-center">
-                      <FiEdit3
-                        className="operationsList-edit-button"
-                        onClick={() => handleEdit(row.id)}
-                      />
-                      <GoTrash
-                        className="operationsList-delete-button"
-                        onClick={() => handleDelete(row.id)}
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="operationsList-action-icons !flex !justify-center">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="operationsList-edit-button"
+                            onClick={() => handleEdit(row.id)}
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="operationsList-delete-button"
+                            onClick={() => handleDelete(row.id)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

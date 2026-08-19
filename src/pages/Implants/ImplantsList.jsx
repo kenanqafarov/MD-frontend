@@ -6,11 +6,18 @@ import { GoTrash } from "react-icons/go";
 import { HiOutlineArrowsUpDown } from "react-icons/hi2";
 import { Link, useNavigate } from "react-router-dom";
 import useImplantStore from "../../../stores/implantStore";
+import { usePermission } from "../../hooks/usePermission";
 
 const ImplantsList = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("İmplantlar", "CREATE");
+  const canUpdate = hasPermission("İmplantlar", "UPDATE");
+  const canDelete = hasPermission("İmplantlar", "DELETE");
+  const canStatus = hasPermission("İmplantlar", "STATUS");
 
   const { implants, fetchImplants, removeImplant, changeStatus, loading } =
     useImplantStore();
@@ -70,9 +77,11 @@ const ImplantsList = () => {
           </div>
         </div>
         <div className="implantsList-actions">
-          <Link to={"./add"} className="implantsList-add-new-button">
-            <span>+</span> Yenisini əlavə et
-          </Link>
+          {canCreate && (
+            <Link to={"./add"} className="implantsList-add-new-button">
+              <span>+</span> Yenisini əlavə et
+            </Link>
+          )}
           <button className="implantsList-download-button">
             <FiDownload className="implantsList-download-icon" />
           </button>
@@ -99,7 +108,7 @@ const ImplantsList = () => {
                 <HiOutlineArrowsUpDown className="mt-1" /> Status
                 </span>
               </th>
-              <th>Düzəliş</th>
+              {(canUpdate || canDelete) && <th>Düzəliş</th>}
             </tr>
           </thead>
           <tbody>
@@ -117,25 +126,31 @@ const ImplantsList = () => {
                       Ölçüləri ({row.implantSizesReads?.length || 0})
                     </Link>
                   </td>
-                  <td className="cursor-pointer !text-center">
+                  <td className="!text-center" style={{ cursor: canStatus ? "pointer" : "default" }}>
                     <span
                       className={`implantsList-status-badge ${
                         row.status === "ACTIVE" ? "active" : "passive"
                       }`}
-                      onClick={() => handleStatusChange(row.id, row.status)}>
+                      onClick={() => canStatus && handleStatusChange(row.id, row.status)}>
                       {row.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                     </span>
                   </td>
-                  <td className="flex gap-2 mt-2.5">
-                    <FiEdit3
-                      className="implantsList-edit-button"
-                      onClick={() => navigate(`/implants/edit/${row.id}`)}
-                    />
-                    <GoTrash
-                      className="implantsList-delete-button"
-                      onClick={() => handleDelete(row.id)}
-                    />
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td className="flex gap-2 mt-2.5">
+                      {canUpdate && (
+                        <FiEdit3
+                          className="implantsList-edit-button"
+                          onClick={() => navigate(`/implants/edit/${row.id}`)}
+                        />
+                      )}
+                      {canDelete && (
+                        <GoTrash
+                          className="implantsList-delete-button"
+                          onClick={() => handleDelete(row.id)}
+                        />
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (

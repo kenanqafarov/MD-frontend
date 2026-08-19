@@ -13,6 +13,7 @@ import { FaPlus } from "react-icons/fa6";
 
 // Zustand store-u import edirik
 import { useLaboratoryPaymentStore } from "../../../stores/dentalOrderReportStore";
+import { usePermission } from "../../hooks/usePermission";
 
 function TechnicalsReport() {
   const navigate = useNavigate();
@@ -22,6 +23,9 @@ function TechnicalsReport() {
     useLaboratoryPaymentStore();
 
   const [searchQuery, setSearchQuery] = useState("");
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Texniklər üzrə hesabat", "CREATE");
 
   // Komponent yükləndikdə ödəniş məlumatlarını çəkirik
   useEffect(() => {
@@ -93,12 +97,14 @@ function TechnicalsReport() {
           </div>
         </div>
         <div className="rightPartHeader">
-          <p
-            className="addNowOrder"
-            onClick={() => navigate("add")}
-          >
-            <FaPlus className="plusBTN" /> Yenisini əlavə et
-          </p>
+          {canCreate && (
+            <p
+              className="addNowOrder"
+              onClick={() => navigate("add")}
+            >
+              <FaPlus className="plusBTN" /> Yenisini əlavə et
+            </p>
+          )}
           <FiDownload
             className="exportDataNow"
             onClick={() => navigate("/data/export")}

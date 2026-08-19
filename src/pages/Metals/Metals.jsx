@@ -13,6 +13,7 @@ import "../../assets/style/Metals/metals.css";
 
 // Store
 import useMetalStore from "../../../stores/metalsStore";
+import { usePermission } from "../../hooks/usePermission";
 
 function Metal() {
   const navigate = useNavigate();
@@ -20,6 +21,12 @@ function Metal() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Digər", "CREATE");
+  const canUpdate = hasPermission("Digər", "UPDATE");
+  const canDelete = hasPermission("Digər", "DELETE");
+  const canStatus = hasPermission("Digər", "STATUS");
 
   useEffect(() => {
     fetchMetals();
@@ -74,9 +81,11 @@ function Metal() {
           </div>
         </div>
         <div className="rightPart">
-          <Link className="addMetal" to={"add"}>
-            <IoMdAdd className="addMetalIcon" /> Yenisini əlavə et
-          </Link>
+          {canCreate && (
+            <Link className="addMetal" to={"add"}>
+              <IoMdAdd className="addMetalIcon" /> Yenisini əlavə et
+            </Link>
+          )}
           <button
             className="exportmetal"
             onClick={() => alert("Export funksiyası əlavə olunacaq")}
@@ -108,7 +117,7 @@ function Metal() {
                   <HiOutlineArrowsUpDown className="arrowIconsNow" /> Status
                 </span>
               </th>
-              <th>Düzəliş</th>
+              {(canUpdate || canDelete) && <th>Düzəliş</th>}
             </tr>
           </thead>
           <tbody>
@@ -125,8 +134,8 @@ function Metal() {
                   <td className="MetalName">{metal.name}</td>
                   <td>
                     <span
-                      onClick={() => toggleStatus(metal)}
-                      style={{ cursor: "pointer", userSelect: "none" }}
+                      onClick={() => canStatus && toggleStatus(metal)}
+                      style={{ cursor: canStatus ? "pointer" : "default", userSelect: "none" }}
                       className={`statusBadge ${
                         metal.status === "ACTIVE" ? "active" : "passive"
                       }`}
@@ -135,18 +144,24 @@ function Metal() {
                       {statusLabels[metal.status] || metal.status}
                     </span>
                   </td>
-                  <td>
-                    <div className="actionIcons">
-                      <FiEdit3
-                        className="editBtn"
-                        onClick={() => handleEdit(metal)}
-                      />
-                      <GoTrash
-                        className="deleteBtn"
-                        onClick={() => handleDelete(metal)}
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="actionIcons">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="editBtn"
+                            onClick={() => handleEdit(metal)}
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="deleteBtn"
+                            onClick={() => handleDelete(metal)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             )}

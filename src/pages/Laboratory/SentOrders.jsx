@@ -14,6 +14,7 @@ import { HiArrowsUpDown } from "react-icons/hi2";
 
 // Store
 import useDentalOrderStore from "../../../stores/dentalOrderStore";
+import { usePermission } from "../../hooks/usePermission";
 
 function SentOrders() {
   const navigate = useNavigate();
@@ -21,6 +22,9 @@ function SentOrders() {
   const [statusFilter, setStatusFilter] = useState("");
   const [excelLoading, setExcelLoading] = useState(false);
   const [exportMessage, setExportMessage] = useState(null);
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Göndərilən sifarişlər", "CREATE");
 
   // Real backend dental orders list from store
   const { orders, loading, error, fetchOrders } = useDentalOrderStore();
@@ -243,12 +247,11 @@ function SentOrders() {
           </div>
         </div>
         <div className="rightPartHeader">
-          <p
-            className="addNowOrder"
-            onClick={() => navigate("/lab/order/add")}
-          >
-            <FaPlus className="plusBTN" /> Yenisini əlavə et
-          </p>
+          {canCreate && (
+            <p className="addNewSentOrder" onClick={() => navigate("/lab/order/add")}>
+              <FaPlus className="plusBTN" /> Yenisini əlavə et
+            </p>
+          )}
           <button
             className="export-excel-btn"
             onClick={exportToExcel}
@@ -316,11 +319,13 @@ function SentOrders() {
           <p className="emptyStateDesc">
             Sistemdə hər hansı bir laboratoriya sifarişi yoxdur. Sifarişlərinizi izləmək üçün yeni sifariş yarada bilərsiniz.
           </p>
-          <div className="emptyStateActions">
-            <button className="emptyStateBtn" onClick={() => navigate("/lab/order/add")}>
-              Yeni sifariş yarat
-            </button>
-          </div>
+          {canCreate && (
+            <div className="emptyStateActions">
+              <button className="emptyStateBtn" onClick={() => navigate("/lab/order/add")}>
+                Yeni sifariş yarat
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="tableWrapper">

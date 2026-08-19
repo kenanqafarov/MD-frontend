@@ -9,6 +9,7 @@ import Modal from "../../components/Modal";
 import useWarehouseEntryStore from "../../../stores/warehouseEntryStore";
 import { useProductCategoryStore } from "../../../stores/productCategories";
 import { useProductStore } from "../../../stores/productStore";
+import { usePermission } from "../../hooks/usePermission";
 
 const StockImport = () => {
  const {
@@ -30,6 +31,11 @@ const StockImport = () => {
  const [entryToDelete, setEntryToDelete] = useState(null);
 
  const navigate = useNavigate();
+
+ const { hasPermission } = usePermission();
+ const canCreate = hasPermission("Anbara maddəxil", "CREATE");
+ const canUpdate = hasPermission("Anbara maddəxil", "UPDATE");
+ const canDelete = hasPermission("Anbara maddəxil", "DELETE");
 
  useEffect(() => {
   const loadInitialData = async () => {
@@ -211,11 +217,13 @@ const StockImport = () => {
      </button>
     </div>
     <div className="flex items-center gap-8">
-     <button
-      className="bg-[#155EEF] text-white px-4 py-2 rounded-lg"
-      onClick={() => navigate("/stock/import/add")}>
-      Yenisini əlavə et
-     </button>
+     {canCreate && (
+      <button
+       className="bg-[#155EEF] text-white px-4 py-2 rounded-lg"
+       onClick={() => navigate("/stock/import/add")}>
+       Yenisini əlavə et
+      </button>
+     )}
      <button onClick={() => console.log("Yükləmə funksiyası əlavə olunmalıdır")}>
       <DownloadIcon />
      </button>
@@ -230,8 +238,8 @@ const StockImport = () => {
      data={dataToShow}
      onRowClick={(row) => handleEntrySelect(row.id)}
      selectedRowId={selectedEntryId}
-     enableDelete={true}
-     enableEdit={true}
+     enableDelete={canDelete}
+     enableEdit={canUpdate}
      enableView={true}
      handleView={handleView}
      handleEdit={handleEdit}

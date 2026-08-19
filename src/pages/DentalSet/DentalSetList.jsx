@@ -6,11 +6,18 @@ import { GoTrash } from "react-icons/go";
 import { HiOutlineArrowsUpDown } from "react-icons/hi2";
 import { useEffect, useState } from "react";
 import useGarnitureStore from "../../../stores/garnitureStore";
+import { usePermission } from "../../hooks/usePermission";
 
 function DentalSetList() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Qarnirlar", "CREATE");
+  const canUpdate = hasPermission("Qarnirlar", "UPDATE");
+  const canDelete = hasPermission("Qarnirlar", "DELETE");
+  const canStatus = hasPermission("Qarnirlar", "STATUS");
 
   const {
     garnitures,
@@ -99,11 +106,13 @@ function DentalSetList() {
           </div>
         </div>
         <div className="dentalSetCategoryRightPart">
-          <Link to={"./add"}>
-            <p className="addNewDentalSetCategory">
-              <span>+</span> Yenisini əlavə et
-            </p>
-          </Link>
+          {canCreate && (
+            <Link to={"./add"}>
+              <p className="addNewDentalSetCategory">
+                <span>+</span> Yenisini əlavə et
+              </p>
+            </Link>
+          )}
           <Link to={"/export"}>
             <FiDownload className="exportDentalSetCategoriesData" />
           </Link>
@@ -128,7 +137,7 @@ function DentalSetList() {
                   <HiOutlineArrowsUpDown className="arrowIconsNow" /> Status
                 </span>
               </th>
-              <th>Düzəliş</th>
+              {(canUpdate || canDelete) && <th>Düzəliş</th>}
             </tr>
           </thead>
           <tbody>
@@ -148,25 +157,31 @@ function DentalSetList() {
                           ? "active"
                           : "passive"
                       }`}
-                      onClick={() => handleStatusChange(row.id, row.status)}
-                      style={{ cursor: "pointer" }}>
+                      onClick={() => canStatus && handleStatusChange(row.id, row.status)}
+                      style={{ cursor: canStatus ? "pointer" : "default" }}>
                       {row.status.toLowerCase() === "active"
                         ? "Aktiv"
                         : "Passiv"}
                     </span>
                   </td>
-                  <td>
-                    <div className="dentalSetActionIcons">
-                      <FiEdit3
-                        className="editBtn"
-                        onClick={() => handleEdit(row)}
-                      />
-                      <GoTrash
-                        className="deleteBtn"
-                        onClick={() => handleDelete(row)}
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="dentalSetActionIcons">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="editBtn"
+                            onClick={() => handleEdit(row)}
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="deleteBtn"
+                            onClick={() => handleDelete(row)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (

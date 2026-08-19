@@ -8,6 +8,7 @@ import { CiExport } from "react-icons/ci";
 import "../../assets/style/ChecklistPage/checklistpage.css";
 import { Link, useNavigate } from "react-router-dom";
 import useExaminationStore from "../../../stores/examinationStore";
+import { usePermission } from "../../hooks/usePermission";
 
 const statusOptions = [
   { value: "", label: "Status" },
@@ -19,6 +20,12 @@ const ChecklistPage = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Müayinə siyahısı", "CREATE");
+  const canUpdate = hasPermission("Müayinə siyahısı", "UPDATE");
+  const canDelete = hasPermission("Müayinə siyahısı", "DELETE");
+  const canStatus = hasPermission("Müayinə siyahısı", "STATUS");
 
   const {
     examinations,
@@ -82,9 +89,11 @@ const ChecklistPage = () => {
             </div>
           </div>
           <div className="rightPartOfTop">
-            <Link to={"add"} className="addNewChecklistItem">
-              <FaPlus /> Yenisini əlavə et
-            </Link>
+            {canCreate && (
+              <Link to={"add"} className="addNewChecklistItem">
+                <FaPlus /> Yenisini əlavə et
+              </Link>
+            )}
             <Link className="exportDataOfChecklist" title="Export">
               <CiExport size={22} className="exportChecklistDataIcon" />
             </Link>
@@ -108,7 +117,7 @@ const ChecklistPage = () => {
                     <HiArrowsUpDown className="tableArrowIcon" /> Status
                   </span>
                 </th>
-                <th>Düzəliş</th>
+                {(canUpdate || canDelete) && <th>Düzəliş</th>}
               </tr>
             </thead>
             <tbody>
@@ -127,25 +136,31 @@ const ChecklistPage = () => {
                         color: item.status === "ACTIVE" ? "#155724" : "#721c24",
                         padding: "4px 10px",
                         borderRadius: "8px",
-                        cursor: "pointer",
+                        cursor: canStatus ? "pointer" : "default",
                         display: "inline-block",
                       }}
-                      onClick={() => toggleStatus(item)}>
+                      onClick={() => canStatus && toggleStatus(item)}>
                       {item.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                     </span>
                   </td>
-                  <td>
-                    <div className="icons flex gap-3 cursor-pointer">
-                      <FiEdit3
-                        className="edit"
-                        onClick={() => handleEdit(item.id)}
-                      />
-                      <GoTrash
-                        className="delete"
-                        onClick={() => handleDelete(item.id)}
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="icons flex gap-3 cursor-pointer">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="edit"
+                            onClick={() => handleEdit(item.id)}
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="delete"
+                            onClick={() => handleDelete(item.id)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
               {filteredChecklistItems.length === 0 && (

@@ -5,10 +5,17 @@ import { CiSearch } from "react-icons/ci";
 import { FiDownload, FiEdit3 } from "react-icons/fi";
 import { GoTrash } from "react-icons/go";
 import useOperationItemsTypeStore from "../../../stores/operationItemTypeStore";
+import { usePermission } from "../../hooks/usePermission";
 
 const OperationList = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Əməliyyat növləri", "CREATE");
+  const canUpdate = hasPermission("Əməliyyat növləri", "UPDATE");
+  const canDelete = hasPermission("Əməliyyat növləri", "DELETE");
+  const canStatus = hasPermission("Əməliyyat növləri", "STATUS");
 
   const {
     operationItemsType,
@@ -96,9 +103,11 @@ const OperationList = () => {
           </div>
         </div>
         <div className="operationsList-actions">
-          <Link to={"./add"} className="operationsList-add-new-button">
-            <span>+</span> Yenisini əlavə et
-          </Link>
+          {canCreate && (
+            <Link to={"./add"} className="operationsList-add-new-button">
+              <span>+</span> Yenisini əlavə et
+            </Link>
+          )}
           <button
             className="operationsList-download-button"
             onClick={handleExport}>
@@ -118,7 +127,7 @@ const OperationList = () => {
               
               <th>Məhsul istifadəsi</th>
               <th>Status</th>
-              <th>Düzəliş</th>
+              {(canUpdate || canDelete) && <th>Düzəliş</th>}
             </tr>
           </thead>
           <tbody>
@@ -132,8 +141,8 @@ const OperationList = () => {
 
                   <td>{item.productUsage || 0}</td>
                   <td
-                    onClick={() => handleStatusToggle(item)}
-                    style={{ cursor: "pointer" }}>
+                    onClick={() => canStatus && handleStatusToggle(item)}
+                    style={{ cursor: canStatus ? "pointer" : "default" }}>
                     <span
                       className={`operationsList-status-badge ${
                         item.status === "ACTIVE" ? "active" : "passive"
@@ -141,18 +150,24 @@ const OperationList = () => {
                       {item.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                     </span>
                   </td>
-                  <td>
-                    <div className="operationsList-action-icons">
-                      <FiEdit3
-                        className="operationsList-edit-button"
-                        onClick={() => handleEdit(item.id)}
-                      />
-                      <GoTrash
-                        className="operationsList-delete-button"
-                        onClick={() => handleDelete(item.id)}
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="operationsList-action-icons">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="operationsList-edit-button"
+                            onClick={() => handleEdit(item.id)}
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="operationsList-delete-button"
+                            onClick={() => handleDelete(item.id)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (

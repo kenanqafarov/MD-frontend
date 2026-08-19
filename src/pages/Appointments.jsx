@@ -1,4 +1,4 @@
- import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   format,
   addDays,
@@ -18,6 +18,7 @@ import CustomSelect from "../components/CustomSelect.jsx";
 import { useNavigate } from "react-router-dom";
 import useGeneralCalendarStore from "../../stores/appointments";
 import "../assets/style/appointments.css";
+import { usePermission } from "../hooks/usePermission";
 
 const WEEKDAYS_SHORT = ["B.e", "Ç.a", "Ç", "C.a", "C", "Ş", "B"];
 const startTime = "06:30";
@@ -49,6 +50,8 @@ const generateRandomColor = () => {
 
 const Appointments = () => {
   const navigate = useNavigate();
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Ümumi təqvim", "CREATE");
   const calendarRef = useRef(null);
 
   const [selectedRoom, setSelectedRoom] = useState(null);
@@ -246,12 +249,14 @@ const Appointments = () => {
               <button className="nav-button" onClick={goToNextWeek}>
                 <IoIosArrowForward />
               </button>
-              <button
-                className="addNewAppointment"
-                onClick={() => navigate("/appointments/add")}>
-                <TbCalendarPlus className="addNewAppointmentIcon" />
-                Yeni randevu əlavə et
-              </button>
+              {canCreate && (
+                <button
+                  className="addNewAppointment"
+                  onClick={() => navigate("/appointments/add")}>
+                  <TbCalendarPlus className="addNewAppointmentIcon" />
+                  Yeni randevu əlavə et
+                </button>
+              )}
               {showCalendar && (
                 <div className="calendar-dropdown" ref={calendarRef}>
                   {/* Calendar buraya əlavə edilə bilər */}

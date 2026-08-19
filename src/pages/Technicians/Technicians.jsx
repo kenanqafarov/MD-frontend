@@ -7,8 +7,14 @@ import { FiEdit3 } from "react-icons/fi";
 import { GoTrash } from "react-icons/go";
 import "../../assets/style/Technicians/technicians.css";
 import "./tech.css";
+import { usePermission } from "../../hooks/usePermission";
 
 function Technicians() {
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Texniklər", "CREATE");
+  const canUpdate = hasPermission("Texniklər", "UPDATE");
+  const canDelete = hasPermission("Texniklər", "DELETE");
+  const canStatus = hasPermission("Texniklər", "STATUS");
   const {
     technicians,
     fetchTechnicians,
@@ -66,17 +72,21 @@ function Technicians() {
       action: (row) => navigation(`${row.id}`),
       className: "info",
     },
-    {
+  ];
+  if (canUpdate) {
+    icons.push({
       icon: FiEdit3,
       action: (row) => navigation(`edit/${row.id}`),
       className: "edit",
-    },
-    {
+    });
+  }
+  if (canDelete) {
+    icons.push({
       icon: GoTrash,
       action: (row) => handleDelete(row),
       className: "delete",
-    },
-  ];
+    });
+  }
 
   if (loading) {
     return <div>Yüklənir...</div>;
@@ -109,9 +119,11 @@ function Technicians() {
           </div>
         </div>
         <div className="rightPartOfTop">
-          <Link className="addNewTechnicianNow" to={"add"}>
-            <span>+</span> Yenisini əlavə et
-          </Link>
+          {canCreate && (
+            <Link className="addNewTechnicianNow" to={"add"}>
+              <span>+</span> Yenisini əlavə et
+            </Link>
+          )}
           <button
             className="exportDataOfTechs"
             onClick={exportToExcel}
@@ -202,9 +214,9 @@ function Technicians() {
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleStatus(tech);
+                          canStatus && toggleStatus(tech);
                         }}
-                        style={{ cursor: "pointer" }}
+                        style={{ cursor: canStatus ? "pointer" : "default" }}
                         title="Statusu dəyişmək üçün klikləyin"
                       >
                         {getStatus(tech)}

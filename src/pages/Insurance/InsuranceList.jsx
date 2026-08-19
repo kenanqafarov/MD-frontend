@@ -6,10 +6,17 @@ import { HiOutlineArrowsUpDown } from "react-icons/hi2";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useInsuranceCompanyStore from "../../../stores/insuranceStore";
+import { usePermission } from "../../hooks/usePermission";
 
 function InsuranceList() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Sığorta şirkətləri", "CREATE");
+  const canUpdate = hasPermission("Sığorta şirkətləri", "UPDATE");
+  const canDelete = hasPermission("Sığorta şirkətləri", "DELETE");
+  const canStatus = hasPermission("Sığorta şirkətləri", "STATUS");
 
   const {
     insuranceCompanies, // artıq bu düz massivdir
@@ -75,11 +82,13 @@ function InsuranceList() {
           </div>
         </div>
         <div className="insuranceCategoryRightPart">
-          <Link to={"./add"}>
-            <p className="addNewInsuranceCategory">
-              <span>+</span> Yenisini əlavə et
-            </p>
-          </Link>
+          {canCreate && (
+            <Link to={"./add"}>
+              <p className="addNewInsuranceCategory">
+                <span>+</span> Yenisini əlavə et
+              </p>
+            </Link>
+          )}
           <Link to={"/export"}>
             <FiDownload className="exportInsuranceCategoriesData" />
           </Link>
@@ -106,7 +115,7 @@ function InsuranceList() {
                   <HiOutlineArrowsUpDown className="arrowIconsNow" /> Status
                 </span>
               </th>
-              <th>Düzəliş</th>
+              {(canUpdate || canDelete) && <th>Düzəliş</th>}
             </tr>
           </thead>
           <tbody>
@@ -127,24 +136,30 @@ function InsuranceList() {
                       className={`statusBadge ${
                         row.status === "ACTIVE" ? "active" : "passive"
                       }`}
-                      onClick={() => handleStatusChange(row.id, row.status)}
-                      style={{ cursor: "pointer" }}
+                      onClick={() => canStatus && handleStatusChange(row.id, row.status)}
+                      style={{ cursor: canStatus ? "pointer" : "default" }}
                     >
                       {row.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                     </span>
                   </td>
-                  <td>
-                    <div className="insuranceActionIcons">
-                      <FiEdit3
-                        className="editBtn"
-                        onClick={() => handleEdit(row)}
-                      />
-                      <GoTrash
-                        className="deleteBtn"
-                        onClick={() => handleDelete(row)}
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="insuranceActionIcons">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="editBtn"
+                            onClick={() => handleEdit(row)}
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="deleteBtn"
+                            onClick={() => handleDelete(row)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             )}

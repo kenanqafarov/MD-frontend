@@ -7,6 +7,7 @@ import { FaPlus } from "react-icons/fa";
 import "../../assets/style/PriceCategory/pricecategory.css";
 import { Link, useNavigate } from "react-router-dom";
 import usePriceCategoryStore from "../../../stores/priceCategoryStore";
+import { usePermission } from "../../hooks/usePermission";
 
 const statusOptions = [
   { value: "", label: "Status" },
@@ -18,6 +19,12 @@ const PriceCategory = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Qiymət kateqoriyaları", "CREATE");
+  const canUpdate = hasPermission("Qiymət kateqoriyaları", "UPDATE");
+  const canDelete = hasPermission("Qiymət kateqoriyaları", "DELETE");
+  const canStatus = hasPermission("Qiymət kateqoriyaları", "STATUS");
 
   const {
     categories,
@@ -84,9 +91,11 @@ const PriceCategory = () => {
             </div>
           </div>
           <div className="rightPartOfTop">
-            <Link to={"add"} className="addNewPriceCategory">
-              <FaPlus /> Yeni kateqoriya əlavə et
-            </Link>
+            {canCreate && (
+              <Link to={"add"} className="addNewPriceCategory">
+                <FaPlus /> Yeni kateqoriya əlavə et
+              </Link>
+            )}
             <button
               className="exportDataOfPriceCategory"
               title="Export"
@@ -114,7 +123,7 @@ const PriceCategory = () => {
                     <HiArrowsUpDown className="tableArrowIcon" /> Status
                   </span>
                 </th>
-                <th>Düzəliş</th>
+                {(canUpdate || canDelete) && <th>Düzəliş</th>}
               </tr>
             </thead>
             <tbody>
@@ -132,8 +141,8 @@ const PriceCategory = () => {
                     <td>{idx + 1}</td>
                     <td>{item.name}</td>
                     <td
-                      onClick={() => handleStatusToggle(item)}
-                      style={{ cursor: "pointer" }}
+                      onClick={() => canStatus && handleStatusToggle(item)}
+                      style={{ cursor: canStatus ? "pointer" : "default" }}
                     >
                       <span
                         className={`status ${
@@ -143,18 +152,24 @@ const PriceCategory = () => {
                         {item.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                       </span>
                     </td>
-                    <td>
-                      <div className="icons flex gap-3 cursor-pointer">
-                        <FiEdit3
-                          className="edit"
-                          onClick={() => handleEdit(item.id)}
-                        />
-                        <GoTrash
-                          className="delete"
-                          onClick={() => handleDelete(item.id)}
-                        />
-                      </div>
-                    </td>
+                    {(canUpdate || canDelete) && (
+                      <td>
+                        <div className="icons flex gap-3 cursor-pointer">
+                          {canUpdate && (
+                            <FiEdit3
+                              className="edit"
+                              onClick={() => handleEdit(item.id)}
+                            />
+                          )}
+                          {canDelete && (
+                            <GoTrash
+                              className="delete"
+                              onClick={() => handleDelete(item.id)}
+                            />
+                          )}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}

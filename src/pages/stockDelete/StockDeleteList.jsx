@@ -5,6 +5,7 @@ import CustomDropdown from "../../components/CustomDropdown";
 import DownloadIcon from "../../assets/icons/Download";
 import { useNavigate } from "react-router-dom";
 import useWarehouseDeletionStore from "../../../stores/warehouseDeletionStore";
+import { usePermission } from "../../hooks/usePermission";
 
 const StockDelete = () => {
   const navigate = useNavigate();
@@ -16,6 +17,11 @@ const StockDelete = () => {
     deleteDeletion,
     searchDeletions,
   } = useWarehouseDeletionStore();
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Anbardan silinmə", "CREATE");
+  const canUpdate = hasPermission("Anbardan silinmə", "UPDATE");
+  const canDelete = hasPermission("Anbardan silinmə", "DELETE");
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState(""); // Axtarış üçün tarix state-i
@@ -138,13 +144,15 @@ const StockDelete = () => {
           </button>
         </div>
         <div className="flex items-center gap-8">
-          <button
-            className="bg-[#155EEF] text-white px-4 py-2 rounded-lg"
-            onClick={() => {
-              navigate("/stock/delete/add");
-            }}>
-            Yenisini əlavə et
-          </button>
+          {canCreate && (
+            <button
+              className="bg-[#155EEF] text-white px-4 py-2 rounded-lg"
+              onClick={() => {
+                navigate("/stock/delete/add");
+              }}>
+              Yenisini əlavə et
+            </button>
+          )}
           <button className="">
             <DownloadIcon />
           </button>
@@ -154,8 +162,8 @@ const StockDelete = () => {
       <SimpleList
         columns={columns}
         data={listData}
-        enableDelete={true}
-        enableEdit={true}
+        enableDelete={canDelete}
+        enableEdit={canUpdate}
         enableView={true}
         handleView={(id) => {
           navigate("/stock/delete/" + id);

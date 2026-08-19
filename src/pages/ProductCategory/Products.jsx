@@ -7,12 +7,19 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import { useProductStore } from "../../../stores/productStore";
+import { usePermission } from "../../hooks/usePermission";
 
 function Products() {
   const navigate = useNavigate();
   const { name } = useParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Məhsul kateqoriyaları", "CREATE");
+  const canUpdate = hasPermission("Məhsul kateqoriyaları", "UPDATE");
+  const canDelete = hasPermission("Məhsul kateqoriyaları", "DELETE");
+  const canStatus = hasPermission("Məhsul kateqoriyaları", "STATUS");
   
   const {
     products,
@@ -103,11 +110,13 @@ function Products() {
           </div>
         </div>
         <div className="productCategoryRightPart">
-          <Link to={"./add-new"}>
-            <p className="addNewProductCategory">
-              <span>+</span> Yenisini əlavə et
-            </p>
-          </Link>
+          {canCreate && (
+            <Link to={"./add-new"}>
+              <p className="addNewProductCategory">
+                <span>+</span> Yenisini əlavə et
+              </p>
+            </Link>
+          )}
           <Link to={"/export"}>
             <FiDownload className="exportProductCategoriesData" />
           </Link>
@@ -142,12 +151,12 @@ function Products() {
                     Özəllikləri
                   </span>
                 </th>
-                <th>
+                 <th>
                   <span>
                     <HiOutlineArrowsUpDown className="arrowIconsNow" /> Status
                   </span>
                 </th>
-                <th>Düzəliş</th>
+                {(canUpdate || canDelete) && <th>Düzəliş</th>}
               </tr>
             </thead>
             <tbody>
@@ -160,24 +169,30 @@ function Products() {
                   <td>
                     <span
                       className={`statusBadge ${row.status?.toLowerCase() === "active" ? "active" : "passive"}`}
-                      style={{ cursor: "pointer" }}
-                      onClick={() => toggleStatus(row)}
+                      style={{ cursor: canStatus ? "pointer" : "default" }}
+                      onClick={() => canStatus && toggleStatus(row)}
                       title="Statusu dəyişmək üçün kliklə">
                       {row.status?.toLowerCase() === "active" ? "Aktiv" : "Passiv"}
                     </span>
                   </td>
-                  <td>
-                    <div className="productActionIcons">
-                      <FiEdit3
-                        className="editBtn"
-                        onClick={() => handleEdit(row)}
-                      />
-                      <GoTrash
-                        className="deleteBtn"
-                        onClick={() => handleDelete(row)}
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="productActionIcons">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="editBtn"
+                            onClick={() => handleEdit(row)}
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="deleteBtn"
+                            onClick={() => handleDelete(row)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

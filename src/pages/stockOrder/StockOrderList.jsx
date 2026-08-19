@@ -8,12 +8,18 @@ import useOrderFromWarehouseStore from "../../../stores/orderFromWarehouseStore"
 import useWorkerStore from "../../../stores/workerStore";
 import useCabinetStore from "../../../stores/cabinetStore";
 import Modal from "../../components/Modal";
+import { usePermission } from "../../hooks/usePermission";
 
 const StockOrder = () => {
   const navigate = useNavigate();
   const { orders, error, fetchOrders } = useOrderFromWarehouseStore();
   const { workers, fetchWorkers } = useWorkerStore();
   const { cabinets, fetchCabinets } = useCabinetStore();
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Anbara sifariş", "CREATE");
+  const canUpdate = hasPermission("Anbara sifariş", "UPDATE");
+  const canDelete = hasPermission("Anbara sifariş", "DELETE");
 
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -152,12 +158,14 @@ const StockOrder = () => {
           </button>
         </div>
         <div className="flex items-center gap-4">
-          <button
-            className="bg-[#155EEF] text-white px-4 py-2 rounded-lg"
-            onClick={() => navigate("/stock/order/add")}
-          >
-            Yenisini əlavə et
-          </button>
+          {canCreate && (
+            <button
+              className="bg-[#155EEF] text-white px-4 py-2 rounded-lg"
+              onClick={() => navigate("/stock/order/add")}
+            >
+              Yenisini əlavə et
+            </button>
+          )}
           <button>
             <DownloadIcon />
           </button>
@@ -170,8 +178,8 @@ const StockOrder = () => {
         <SimpleList
           columns={columns}
           data={formattedOrders}
-          enableDelete={true}
-          enableEdit={true}
+          enableDelete={canDelete}
+          enableEdit={canUpdate}
           enableView={true}
           handleView={(id) => navigate(`/stock/order/detail/${id}`)}
           handleEdit={(id) => navigate(`/stock/order/edit/${id}`)}

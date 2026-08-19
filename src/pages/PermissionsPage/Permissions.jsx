@@ -18,6 +18,7 @@ import { Link } from "react-router-dom";
 
 // Store
 import usePermissionStore from "../../../stores/permissionStore";
+import { usePermission } from "../../hooks/usePermission";
 
 const statusOptions = [
   { value: "", label: "Status" },
@@ -29,6 +30,12 @@ function Permissions() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [status, setStatus] = useState("");
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("İcazələr", "CREATE");
+  const canUpdate = hasPermission("İcazələr", "UPDATE");
+  const canDelete = hasPermission("İcazələr", "DELETE");
+  const canStatus = hasPermission("İcazələr", "STATUS");
 
   const {
     permissions,
@@ -104,9 +111,11 @@ function Permissions() {
           </div>
         </div>
         <div className="rightPart">
-          <Link className="addPermission" to={"add"}>
-            <IoMdAdd className="addPermissionIcon" /> Yenisini əlavə et
-          </Link>
+          {canCreate && (
+            <Link className="addPermission" to={"add"}>
+              <IoMdAdd className="addPermissionIcon" /> Yenisini əlavə et
+            </Link>
+          )}
           <Link className="exportPermissions">
             <FiDownload className="exportPermissionsIcon" />
           </Link>
@@ -147,9 +156,9 @@ function Permissions() {
                   <td
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleStatusToggle(row);
+                      canStatus && handleStatusToggle(row);
                     }}
-                    style={{ cursor: "pointer" }}>
+                    style={{ cursor: canStatus ? "pointer" : "default" }}>
                     <span
                       className={`statusBadge ${
                         row.status === "ACTIVE" ? "active" : "passive"
@@ -168,20 +177,24 @@ function Permissions() {
                           handleInfo(row);
                         }}
                       />
-                      <FiEdit3
-                        className="editBtn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(row);
-                        }}
-                      />
-                      <GoTrash
-                        className="deleteBtn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(row);
-                        }}
-                      />
+                      {canUpdate && (
+                        <FiEdit3
+                          className="editBtn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(row);
+                          }}
+                        />
+                      )}
+                      {canDelete && (
+                        <GoTrash
+                          className="deleteBtn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(row);
+                          }}
+                        />
+                      )}
                     </div>
                   </td>
                 </tr>

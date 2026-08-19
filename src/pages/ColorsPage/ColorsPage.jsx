@@ -8,6 +8,7 @@ import "../../assets/style/ColorsPage/colorspage.css";
 import { CiExport } from "react-icons/ci";
 import { Link, useNavigate } from "react-router-dom";
 import useColorStore from "../../../stores/colorStore";
+import { usePermission } from "../../hooks/usePermission";
 
 const statusOptions = [
   { value: "", label: "Status" },
@@ -17,6 +18,12 @@ const statusOptions = [
 
 const ColorsPage = () => {
   const navigate = useNavigate();
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Rənglər", "CREATE");
+  const canUpdate = hasPermission("Rənglər", "UPDATE");
+  const canDelete = hasPermission("Rənglər", "DELETE");
+  const canStatus = hasPermission("Rənglər", "STATUS");
 
   const colors = useColorStore((state) => state.colors);
   const fetchColors = useColorStore((state) => state.fetchColors);
@@ -90,9 +97,11 @@ const ColorsPage = () => {
             </div>
           </div>
           <div className="rightPartOfTop">
-            <Link to={"add"} className="addNewChecklistItem">
-              <FaPlus /> Yenisini əlavə et
-            </Link>
+            {canCreate && (
+              <Link to={"add"} className="addNewChecklistItem">
+                <FaPlus /> Yenisini əlavə et
+              </Link>
+            )}
             <Link
               to={"export"}
               className="exportDataOfChecklist"
@@ -119,7 +128,7 @@ const ColorsPage = () => {
                     <HiArrowsUpDown className="tableArrowIcon" /> Status
                   </span>
                 </th>
-                <th>Düzəliş</th>
+                {(canUpdate || canDelete) && <th>Düzəliş</th>}
               </tr>
             </thead>
             <tbody>
@@ -129,25 +138,32 @@ const ColorsPage = () => {
                   <td>{item.name}</td>
                   <td>
                     <span
-                      className={`status cursor-pointer ${
+                      className={`status ${
                         item.status === "ACTIVE" ? "active" : "passive"
                       }`}
-                      onClick={() => handleStatusClick(item.id, item.status)}>
+                      style={{ cursor: canStatus ? "pointer" : "default" }}
+                      onClick={() => canStatus && handleStatusClick(item.id, item.status)}>
                       {item.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                     </span>
                   </td>
-                  <td>
-                    <div className="icons flex gap-3 cursor-pointer">
-                      <FiEdit3
-                        className="edit"
-                        onClick={() => handleEdit(item.id)}
-                      />
-                      <GoTrash
-                        className="delete"
-                        onClick={() => handleDelete(item.id)}
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="icons flex gap-3 cursor-pointer">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="edit"
+                            onClick={() => handleEdit(item.id)}
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="delete"
+                            onClick={() => handleDelete(item.id)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
               {filteredColors.length === 0 && (

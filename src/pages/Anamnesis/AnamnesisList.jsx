@@ -11,10 +11,17 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAnamnesisListStore from "../../../stores/anamnesStore";
 import { exportAnamnesisItemsToExcel } from "../../../src/api/anamnesis-list";
+import { usePermission } from "../../hooks/usePermission";
 
 const AnamnesisList = () => {
   const navigate = useNavigate();
   const { categoryId } = useParams();
+  
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Anamnez siyahısı", "CREATE");
+  const canUpdate = hasPermission("Anamnez siyahısı", "UPDATE");
+  const canDelete = hasPermission("Anamnez siyahısı", "DELETE");
+  const canStatus = hasPermission("Anamnez siyahısı", "STATUS");
   const {
     anamnesisList,
     fetchAnamnesisList,
@@ -149,15 +156,17 @@ const AnamnesisList = () => {
           >
             <FiDownload />
           </button>
-          <div
-            className="anamnesisList-add-new-button"
-            onClick={() =>
-              navigate(`/anamnesis/anamnesis-details/${categoryId}/add`)
-            }
-            style={{ cursor: "pointer" }}
-          >
-            <FaPlus style={{ marginRight: "4px" }} /> Yeni anamnez əlavə et
-          </div>
+          {canCreate && (
+            <div
+              className="anamnesisList-add-new-button"
+              onClick={() =>
+                navigate(`/anamnesis/anamnesis-details/${categoryId}/add`)
+              }
+              style={{ cursor: "pointer" }}
+            >
+              <FaPlus style={{ marginRight: "4px" }} /> Yeni anamnez əlavə et
+            </div>
+          )}
         </div>
       </div>
 
@@ -181,7 +190,7 @@ const AnamnesisList = () => {
                   <HiOutlineArrowsUpDown /> Status
                 </span>
               </th>
-              <th>Düzəliş</th>
+              {(canUpdate || canDelete) && <th>Düzəliş</th>}
             </tr>
           </thead>
           <tbody>
@@ -204,8 +213,8 @@ const AnamnesisList = () => {
                   <td>{row.name}</td>
                   <td>
                     <span
-                      onClick={() => toggleStatus(row)}
-                      style={{ cursor: "pointer" }}
+                      onClick={() => canStatus && toggleStatus(row)}
+                      style={{ cursor: canStatus ? "pointer" : "default" }}
                       className={`anamnesisList-status-badge ${
                         row.status === "ACTIVE" ? "active" : "passive"
                       }`}
@@ -214,20 +223,26 @@ const AnamnesisList = () => {
                       {row.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                     </span>
                   </td>
-                  <td>
-                    <div className="anamnesisList-action-icons">
-                      <FiEdit3
-                        className="anamnesisList-edit-button"
-                        onClick={() => handleEdit(row.id)}
-                        title="Düzəlt"
-                      />
-                      <GoTrash
-                        className="anamnesisList-delete-button"
-                        onClick={() => handleDelete(row.id, row.name)}
-                        title="Sil"
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="anamnesisList-action-icons">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="anamnesisList-edit-button"
+                            onClick={() => handleEdit(row.id)}
+                            title="Düzəlt"
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="anamnesisList-delete-button"
+                            onClick={() => handleDelete(row.id, row.name)}
+                            title="Sil"
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             )}

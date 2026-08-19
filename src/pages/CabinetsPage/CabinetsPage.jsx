@@ -9,6 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "../../assets/style/CabinetsPage/cabinetspage.css";
 import useCabinetStore from "../../../stores/cabinetStore";
 import "./cabinet.css";
+import { usePermission } from "../../hooks/usePermission";
 
 const statusOptions = [
   { value: "", label: "Status" },
@@ -22,6 +23,12 @@ const formatStatus = (status) => {
 
 const CabinetsPage = () => {
   const navigate = useNavigate();
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Kabinetlər", "CREATE");
+  const canUpdate = hasPermission("Kabinetlər", "UPDATE");
+  const canDelete = hasPermission("Kabinetlər", "DELETE");
+  const canStatus = hasPermission("Kabinetlər", "STATUS");
 
   const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
@@ -81,9 +88,11 @@ const CabinetsPage = () => {
             </div>
           </div>
           <div className="rightPartOfTop">
-            <Link to={"add"} className="addNewCabinetItem">
-              <FaPlus /> Yenisini əlavə et
-            </Link>
+            {canCreate && (
+              <Link to={"add"} className="addNewCabinetItem">
+                <FaPlus /> Yenisini əlavə et
+              </Link>
+            )}
             <Link className="exportDataOfCabinets" title="Export">
               <CiExport size={22} className="exportCabinetDataIcon" />
             </Link>
@@ -107,7 +116,7 @@ const CabinetsPage = () => {
                     <HiArrowsUpDown className="tableArrowIcon" /> Status
                   </span>
                 </th>
-                <th>Düzəliş</th>
+                {(canUpdate || canDelete) && <th>Düzəliş</th>}
               </tr>
             </thead>
             <tbody>
@@ -130,23 +139,30 @@ const CabinetsPage = () => {
                           item.status === "ACTIVE" ? "active" : "passive"
                         }`}
                         onClick={() =>
-                          handleStatusToggle(item.id, item.status)
-                        }>
+                          canStatus && handleStatusToggle(item.id, item.status)
+                        }
+                        style={{ cursor: canStatus ? "pointer" : "default" }}>
                         {formatStatus(item.status)}
                       </span>
                     </td>
-                    <td>
-                      <div className="icons flex gap-3 cursor-pointer">
-                        <FiEdit3
-                          className="edit"
-                          onClick={() => handleEdit(item.id)}
-                        />
-                        <GoTrash
-                          className="delete"
-                          onClick={() => handleDelete(item.id)}
-                        />
-                      </div>
-                    </td>
+                    {(canUpdate || canDelete) && (
+                      <td>
+                        <div className="icons flex gap-3 cursor-pointer">
+                          {canUpdate && (
+                            <FiEdit3
+                              className="edit"
+                              onClick={() => handleEdit(item.id)}
+                            />
+                          )}
+                          {canDelete && (
+                            <GoTrash
+                              className="delete"
+                              onClick={() => handleDelete(item.id)}
+                            />
+                          )}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}

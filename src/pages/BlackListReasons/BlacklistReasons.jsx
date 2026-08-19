@@ -9,12 +9,19 @@ import { HiOutlineArrowsUpDown } from "react-icons/hi2";
 
 import useBlackListResultStore from "../../../stores/blacklistReasonStore";
 import "../../assets/style/Specialities/specialities.css";
+import { usePermission } from "../../hooks/usePermission";
 
 function BlacklistReasons() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [refreshKey, setRefreshKey] = useState(0); // 👈
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Qara siyahı səbəbləri", "CREATE");
+  const canUpdate = hasPermission("Qara siyahı səbəbləri", "UPDATE");
+  const canDelete = hasPermission("Qara siyahı səbəbləri", "DELETE");
+  const canStatus = hasPermission("Qara siyahı səbəbləri", "STATUS");
 
   const {
     results,
@@ -87,9 +94,11 @@ function BlacklistReasons() {
           </div>
         </div>
         <div className="rightPart">
-          <Link className="addSpeciality" to={"/add-reason"}>
-            <IoMdAdd className="addSpecialityIcon" /> Yenisini əlavə et
-          </Link>
+          {canCreate && (
+            <Link className="addSpeciality" to={"/add-reason"}>
+              <IoMdAdd className="addSpecialityIcon" /> Yenisini əlavə et
+            </Link>
+          )}
           <button
             className="exportSpecialities"
             onClick={exportToExcel}
@@ -116,7 +125,7 @@ function BlacklistReasons() {
                   <HiOutlineArrowsUpDown className="arrowIconsNow" /> Status
                 </span>
               </th>
-              <th>Düzəliş</th>
+              {(canUpdate || canDelete) && <th>Düzəliş</th>}
             </tr>
           </thead>
           <tbody>
@@ -127,27 +136,33 @@ function BlacklistReasons() {
                   <td className="specialityName">{row.statusName}</td>
                   <td>
                     <span
-                      onClick={() => toggleStatus(row)}
+                      onClick={() => canStatus && toggleStatus(row)}
                       className={`statusBadge ${
                         row.status === "ACTIVE" ? "active" : "passive"
                       }`}
-                      style={{ cursor: "pointer" }}
+                      style={{ cursor: canStatus ? "pointer" : "default" }}
                       title="Statusu dəyişmək üçün kliklə">
                       {row.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                     </span>
                   </td>
-                  <td>
-                    <div className="actionIcons">
-                      <FiEdit3
-                        className="editBtn"
-                        onClick={() => handleEdit(row)}
-                      />
-                      <GoTrash
-                        className="deleteBtn"
-                        onClick={() => handleDelete(row)}
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="actionIcons">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="editBtn"
+                            onClick={() => handleEdit(row)}
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="deleteBtn"
+                            onClick={() => handleDelete(row)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             ) : !loading ? (

@@ -9,9 +9,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAnamnesisCategoryStore from "../../../stores/anamnesisCategoryStore";
+import { usePermission } from "../../hooks/usePermission";
 
 const AnamnesisList = () => {
   const navigate = useNavigate();
+  
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Anamnez siyahısı", "CREATE");
+  const canUpdate = hasPermission("Anamnez siyahısı", "UPDATE");
+  const canDelete = hasPermission("Anamnez siyahısı", "DELETE");
+  const canStatus = hasPermission("Anamnez siyahısı", "STATUS");
   const {
     categories,
     fetchCategories,
@@ -112,9 +119,11 @@ const AnamnesisList = () => {
             title="Excel formatında yüklə">
             <FiDownload /> Excel
           </button>
-          <Link to="./add-category" className="anamnesisList-add-new-button">
-            <span>+</span> Yeni kateqoriya əlavə et
-          </Link>
+          {canCreate && (
+            <Link to="./add-category" className="anamnesisList-add-new-button">
+              <span>+</span> Yeni kateqoriya əlavə et
+            </Link>
+          )}
         </div>
       </div>
 
@@ -138,7 +147,7 @@ const AnamnesisList = () => {
                   <HiOutlineArrowsUpDown /> Status
                 </span>
               </th>
-              <th>Düzəliş</th>
+              {(canUpdate || canDelete) && <th>Düzəliş</th>}
             </tr>
           </thead>
           <tbody>
@@ -162,8 +171,8 @@ const AnamnesisList = () => {
                   </td>
                   <td>
                     <span
-                      onClick={() => toggleStatus(row)}
-                      style={{ cursor: "pointer" }}
+                      onClick={() => canStatus && toggleStatus(row)}
+                      style={{ cursor: canStatus ? "pointer" : "default" }}
                       className={`anamnesisList-status-badge ${
                         row.status === "ACTIVE" ? "active" : "passive"
                       }`}
@@ -171,18 +180,24 @@ const AnamnesisList = () => {
                       {row.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                     </span>
                   </td>
-                  <td>
-                    <div className="anamnesisList-action-icons">
-                      <FiEdit3
-                        className="anamnesisList-edit-button"
-                        onClick={() => handleEdit(row.id)}
-                      />
-                      <GoTrash
-                        className="anamnesisList-delete-button"
-                        onClick={() => handleDelete(row.id, row.name)}
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="anamnesisList-action-icons">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="anamnesisList-edit-button"
+                            onClick={() => handleEdit(row.id)}
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="anamnesisList-delete-button"
+                            onClick={() => handleDelete(row.id, row.name)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             )}

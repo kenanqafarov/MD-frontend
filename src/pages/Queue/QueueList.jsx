@@ -7,6 +7,7 @@ import { HiArrowsUpDown } from "react-icons/hi2";
 import OrdinaryListHeader from "../../components/OrdinaryList/OrdinaryListHeader";
 import "../../assets/style/QueuePage/queuelist.css";
 import useReservationStore from "../../../stores/reservationStore";
+import { usePermission } from "../../hooks/usePermission";
 
 function QueueList() {
   const [searchName, setSearchName] = useState("");
@@ -16,6 +17,12 @@ function QueueList() {
   const [searchPatronymic, setSearchPatronymic] = useState("");
   const [searchStatus, setSearchStatus] = useState("");
   const [searchDoctor, setSearchDoctor] = useState("");
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Növbə gözləyənlər", "CREATE");
+  const canUpdate = hasPermission("Növbə gözləyənlər", "UPDATE");
+  const canDelete = hasPermission("Növbə gözləyənlər", "DELETE");
+  const canStatus = hasPermission("Növbə gözləyənlər", "STATUS");
 
   const {
     reservations,
@@ -95,6 +102,7 @@ function QueueList() {
         addText="Yenisini əlavə et"
         addLink="/queue/add-new"
         exportLink="/queue/export"
+        showAdd={canCreate}
       />
 
       <div className="queueSearchInputs">
@@ -215,11 +223,13 @@ function QueueList() {
                     <span className="-ml-1">Status</span>
                   </div>
                 </th>
-                <th>
-                  <div className="th-content">
-                    <span className="-ml-1">Düzəliş</span>
-                  </div>
-                </th>
+                {(canUpdate || canDelete) && (
+                  <th>
+                    <div className="th-content">
+                      <span className="-ml-1">Düzəliş</span>
+                    </div>
+                  </th>
+                )}
               </tr>
             </thead>
 
@@ -242,9 +252,9 @@ function QueueList() {
                       className={`queueListStatus ${
                         reservation.status === "ACTIVE" ? "active" : "passive"
                       }`}
-                      style={{ cursor: "pointer" }}
+                      style={{ cursor: canStatus ? "pointer" : "default" }}
                       onClick={() =>
-                        changeStatusHandler(
+                        canStatus && changeStatusHandler(
                           reservation.id,
                           reservation.status === "ACTIVE" ? "PASSIVE" : "ACTIVE"
                         )
@@ -252,18 +262,24 @@ function QueueList() {
                       {reservation.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                     </span>
                   </td>
-                  <td>
-                    <div className="queueListActionsWrapper">
-                      <FiEdit3
-                        className="queueListIcon edit"
-                        onClick={() => handleEdit(reservation.id)}
-                      />
-                      <GoTrash
-                        className="queueListIcon delete"
-                        onClick={() => handleDelete(reservation.id)}
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="queueListActionsWrapper">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="queueListIcon edit"
+                            onClick={() => handleEdit(reservation.id)}
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="queueListIcon delete"
+                            onClick={() => handleDelete(reservation.id)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

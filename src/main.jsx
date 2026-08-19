@@ -634,6 +634,7 @@ const routeModuleMap = {
   "/general-settings": { module: "Ümumi tənzimləmələr", action: "READ" },
   "/metals": { module: "Digər", action: "READ" },
   "/ceramics": { module: "Digər", action: "READ" },
+  "/teeth": { module: "Digər", action: "READ" },
 };
 
 // Test

@@ -6,10 +6,17 @@ import { HiOutlineArrowsUpDown } from "react-icons/hi2";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useImplantSizeStore from "../../../stores/ImplantSizeStore";
+import { usePermission } from "../../hooks/usePermission";
 
 function SizesList() {
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("İmplantlar", "CREATE");
+  const canUpdate = hasPermission("İmplantlar", "UPDATE");
+  const canDelete = hasPermission("İmplantlar", "DELETE");
+  const canStatus = hasPermission("İmplantlar", "STATUS");
   const {
     implants,
     fetchImplantsWithSizes,
@@ -75,11 +82,13 @@ function SizesList() {
           </div>
         </div>
         <div className="sizesCategoryRightPart">
-          <Link to={`./add`}>
-            <p className="addNewSizesCategory">
-              <span>+</span> Yenisini əlavə et
-            </p>
-          </Link>
+          {canCreate && (
+            <Link to={`./add`}>
+              <p className="addNewSizesCategory">
+                <span>+</span> Yenisini əlavə et
+              </p>
+            </Link>
+          )}
           <Link to={"/export"}>
             <FiDownload className="exportSizesCategoriesData" />
           </Link>
@@ -113,7 +122,7 @@ function SizesList() {
                     <HiOutlineArrowsUpDown className="arrowIconsNow" /> Status
                   </span>
                 </th>
-                <th>Düzəliş</th>
+                {(canUpdate || canDelete) && <th>Düzəliş</th>}
               </tr>
             </thead>
             <tbody>
@@ -127,9 +136,9 @@ function SizesList() {
                       className={`statusBadge ${
                         row.status === "ACTIVE" ? "active" : "passive"
                       }`}
-                      onClick={() => toggleStatus(row)}
+                      onClick={() => canStatus && toggleStatus(row)}
                       style={{
-                        cursor: "pointer",
+                        cursor: canStatus ? "pointer" : "default",
                         color: "#fff",
                         padding: "4px 10px",
                         borderRadius: "4px",
@@ -140,18 +149,24 @@ function SizesList() {
                       {row.status === "ACTIVE" ? "Aktiv" : "Passiv"}
                     </span>
                   </td>
-                  <td>
-                    <div className="sizesActionIcons">
-                      <FiEdit3
-                        className="editBtn"
-                        onClick={() => handleEdit(row)}
-                      />
-                      <GoTrash
-                        className="deleteBtn"
-                        onClick={() => handleDelete(row)}
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="sizesActionIcons">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="editBtn"
+                            onClick={() => handleEdit(row)}
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="deleteBtn"
+                            onClick={() => handleDelete(row)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

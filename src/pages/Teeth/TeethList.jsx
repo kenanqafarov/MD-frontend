@@ -6,6 +6,7 @@ import { GoTrash } from "react-icons/go";
 import { HiOutlineArrowsUpDown } from "react-icons/hi2";
 import { Link, useNavigate } from "react-router-dom";
 import useTeethStore from "../../../stores/teethStore";
+import { usePermission } from "../../hooks/usePermission";
 
 const TeethList = () => {
   const navigate = useNavigate();
@@ -16,6 +17,11 @@ const TeethList = () => {
     removeTooth,
     loading,
   } = useTeethStore();
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Digər", "CREATE");
+  const canUpdate = hasPermission("Digər", "UPDATE");
+  const canDelete = hasPermission("Digər", "DELETE");
 
   useEffect(() => {
     fetchTeeth();
@@ -73,7 +79,9 @@ const TeethList = () => {
           </div>
         </div>
         <div className="teethList-actions">
-          <Link to={"add"} className="teethList-add-new-button">+ Yenisini əlavə et</Link>
+          {canCreate && (
+            <Link to={"add"} className="teethList-add-new-button">+ Yenisini əlavə et</Link>
+          )}
           <button className="teethList-download-button">
             <FiDownload className="teethList-download-icon" />
           </button>
@@ -90,7 +98,7 @@ const TeethList = () => {
               <th><span className="!flex !justify-center gap-1"><HiOutlineArrowsUpDown className="mt-1"/> Yeri</span></th>
               <th><span className="!flex !justify-center gap-1"><HiOutlineArrowsUpDown className="mt-1"/> Müayinə şəkilləri</span></th>
               <th><span className="!flex !justify-center gap-1"><HiOutlineArrowsUpDown className="mt-1"/> Əməliyyat şəkilləri</span></th>
-              <th><span className="!flex !justify-center">Düzəliş</span></th>
+              {(canUpdate || canDelete) && <th><span className="!flex !justify-center">Düzəliş</span></th>}
             </tr>
           </thead>
           <tbody>
@@ -111,12 +119,18 @@ const TeethList = () => {
                       Əməliyyat şəkilləri ({tooth.operations?.length || 0})
                     </Link>
                   </td>
-                  <td className="!text-center">
-                    <div className="teethList-action-icons !flex justify-center">
-                      <FiEdit3 onClick={handleEdit(tooth.id)} className="teethList-edit-button" />
-                      <GoTrash onClick={() => handleDelete(tooth.id)} className="teethList-delete-button" />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td className="!text-center">
+                      <div className="teethList-action-icons !flex justify-center">
+                        {canUpdate && (
+                          <FiEdit3 onClick={handleEdit(tooth.id)} className="teethList-edit-button" />
+                        )}
+                        {canDelete && (
+                          <GoTrash onClick={() => handleDelete(tooth.id)} className="teethList-delete-button" />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (

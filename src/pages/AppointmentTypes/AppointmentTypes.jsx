@@ -8,6 +8,7 @@ import "../../assets/style/AppointmentTypes/appointmenttypes.css";
 import { CiExport } from "react-icons/ci";
 import { Link, useNavigate } from "react-router-dom";
 import useAppointmentTypeStore from "../../../stores/appointment-type-store";
+import { usePermission } from "../../hooks/usePermission";
 
 const statusOptions = [
   { value: "", label: "Status" },
@@ -28,6 +29,12 @@ const AppointmentTypes = () => {
   const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Randevu tipləri", "CREATE");
+  const canUpdate = hasPermission("Randevu tipləri", "UPDATE");
+  const canDelete = hasPermission("Randevu tipləri", "DELETE");
+  const canStatus = hasPermission("Randevu tipləri", "STATUS");
 
   useEffect(() => {
     fetchAppointmentTypes();
@@ -104,9 +111,11 @@ const AppointmentTypes = () => {
         </div>
 
         <div className="rightPartOfTop">
-          <Link to={"add"} className="addNewAppointmentType">
-            <FaPlus /> Yenisini əlavə et
-          </Link>
+          {canCreate && (
+            <Link to={"add"} className="addNewAppointmentType">
+              <FaPlus /> Yenisini əlavə et
+            </Link>
+          )}
           <Link className="exportDataOfAppointmentTypes" title="Export">
             <CiExport size={22} className="exportAppointmentTypeDataIcon" />
           </Link>
@@ -136,7 +145,7 @@ const AppointmentTypes = () => {
                   <HiArrowsUpDown className="tableArrowIcon" /> Status
                 </span>
               </th>
-              <th>Düzəliş</th>
+              {(canUpdate || canDelete) && <th>Düzəliş</th>}
             </tr>
           </thead>
 
@@ -148,27 +157,33 @@ const AppointmentTypes = () => {
                 <td>{type?.time ? type.time.slice(0, 5) : ""}</td>
                 <td>
                   <span
-                    onClick={() => toggleStatus(type)}
+                    onClick={() => canStatus && toggleStatus(type)}
                     className={`status ${
                       (type?.status || "") === "ACTIVE" ? "active" : "passive"
                     }`}
-                    style={{ cursor: "pointer", userSelect: "none" }}
+                    style={{ cursor: canStatus ? "pointer" : "default", userSelect: "none" }}
                     title="Statusu dəyişmək üçün kliklə">
                     {(type?.status || "") === "ACTIVE" ? "Aktiv" : "Passiv"}
                   </span>
                 </td>
-                <td>
-                  <div className="icons flex gap-3 cursor-pointer">
-                    <FiEdit3
-                      className="edit"
-                      onClick={() => handleEdit(type?.id)}
-                    />
-                    <GoTrash
-                      className="delete"
-                      onClick={() => handleDelete(type?.id)}
-                    />
-                  </div>
-                </td>
+                {(canUpdate || canDelete) && (
+                  <td>
+                    <div className="icons flex gap-3 cursor-pointer">
+                      {canUpdate && (
+                        <FiEdit3
+                          className="edit"
+                          onClick={() => handleEdit(type?.id)}
+                        />
+                      )}
+                      {canDelete && (
+                        <GoTrash
+                          className="delete"
+                          onClick={() => handleDelete(type?.id)}
+                        />
+                      )}
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

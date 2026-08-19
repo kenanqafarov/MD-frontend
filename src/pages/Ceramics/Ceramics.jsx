@@ -10,11 +10,18 @@ import { HiOutlineArrowsUpDown } from "react-icons/hi2";
 import "../../assets/style/Ceramics/ceramics.css";
 
 import useCeramicsStore from "../../../stores/ceramicStore";
+import { usePermission } from "../../hooks/usePermission";
 
 function Ceramics() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission("Digər", "CREATE");
+  const canUpdate = hasPermission("Digər", "UPDATE");
+  const canDelete = hasPermission("Digər", "DELETE");
+  const canStatus = hasPermission("Digər", "STATUS");
 
   const {
     ceramics,
@@ -98,9 +105,11 @@ function Ceramics() {
           </div>
         </div>
         <div className="rightPart">
-          <Link className="addceramics" to="add">
-            <IoMdAdd className="addceramicsIcon" /> Yenisini əlavə et
-          </Link>
+          {canCreate && (
+            <Link className="addceramics" to="add">
+              <IoMdAdd className="addceramicsIcon" /> Yenisini əlavə et
+            </Link>
+          )}
           <button
             type="button"
             className="exportceramics"
@@ -134,7 +143,7 @@ function Ceramics() {
                   <HiOutlineArrowsUpDown className="arrowIconsNow" /> Status
                 </span>
               </th>
-              <th>Düzəliş</th>
+              {(canUpdate || canDelete) && <th>Düzəliş</th>}
             </tr>
           </thead>
           <tbody>
@@ -151,30 +160,36 @@ function Ceramics() {
                   <td className="ceramicsName">{row.name}</td>
                   <td>
                     <span
-                      onClick={() => toggleStatus(row)}
+                      onClick={() => canStatus && toggleStatus(row)}
                       className={`statusBadge ${
                         row.status === "ACTIVE" ? "active" : "passive"
                       }`}
-                      style={{ cursor: "pointer" }}
+                      style={{ cursor: canStatus ? "pointer" : "default" }}
                       title="Statusu dəyişmək üçün kliklə"
                     >
                       {statusMap[row.status] || row.status}
                     </span>
                   </td>
-                  <td>
-                    <div className="actionIcons">
-                      <FiEdit3
-                        className="editBtn"
-                        onClick={() => handleEdit(row)}
-                        title="Redaktə et"
-                      />
-                      <GoTrash
-                        className="deleteBtn"
-                        onClick={() => handleDelete(row)}
-                        title="Sil"
-                      />
-                    </div>
-                  </td>
+                  {(canUpdate || canDelete) && (
+                    <td>
+                      <div className="actionIcons">
+                        {canUpdate && (
+                          <FiEdit3
+                            className="editBtn"
+                            onClick={() => handleEdit(row)}
+                            title="Redaktə et"
+                          />
+                        )}
+                        {canDelete && (
+                          <GoTrash
+                            className="deleteBtn"
+                            onClick={() => handleDelete(row)}
+                            title="Sil"
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             )}
