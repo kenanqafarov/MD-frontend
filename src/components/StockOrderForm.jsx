@@ -66,6 +66,9 @@ const StockOrderForm = ({
         }));
         setCategories(categoryListData);
 
+        const productsResponse = await axiosInstance.get(
+          "/product/read"
+        );
         const productListData = productsResponse.data.map((prod) => ({
           value: prod.id,
           label: prod.name || prod.productName,
