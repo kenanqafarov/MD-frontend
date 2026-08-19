@@ -216,6 +216,21 @@ function ReportsPage() {
         }
     }, [category, fetchAllOp]);
 
+    // Tab dəyişəndə uyğun filtr dövrünü və tarixlərini tənzimlə
+    useEffect(() => {
+        if (activeTab === 'sifarisler') {
+            setSelectedPeriod('all');
+            setFromDate('');
+            setToDate('');
+        } else {
+            setSelectedPeriod('bu_ay');
+            const d = new Date();
+            d.setDate(d.getDate() - 30);
+            setFromDate(getLocalDateString(d));
+            setToDate(getLocalDateString(new Date()));
+        }
+    }, [activeTab]);
+
     // Format fetched data for dropdowns
     const formattedDoctors = doctors.map(doctor => ({
         value: doctor.name + " " + doctor.surname,
@@ -395,6 +410,24 @@ function ReportsPage() {
 
     const handlePeriodChange = (val) => {
         setSelectedPeriod(val);
+        if (val === 'all') {
+            setFromDate('');
+            setToDate('');
+        } else {
+            const now = new Date();
+            let from = new Date();
+            if (val === 'bu_hefte') {
+                const day = now.getDay();
+                const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+                from = new Date(now.setDate(diff));
+            } else if (val === 'bu_ay') {
+                from = new Date(now.getFullYear(), now.getMonth(), 1);
+            } else if (val === 'bu_il') {
+                from = new Date(now.getFullYear(), 0, 1);
+            }
+            setFromDate(getLocalDateString(from));
+            setToDate(getLocalDateString(new Date()));
+        }
     };
 
     const triggerRefresh = () => {
@@ -697,6 +730,7 @@ function ReportsPage() {
                                 value={selectedPeriod}
                                 onChange={(opt) => handlePeriodChange(opt.value)}
                                 options={[
+                                    { value: 'all', label: 'Hamısı' },
                                     { value: 'bu_ay', label: 'Bu ay' },
                                     { value: 'bu_hefte', label: 'Bu həftə' },
                                     { value: 'bu_il', label: 'Bu il' }
