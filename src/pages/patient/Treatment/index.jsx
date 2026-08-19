@@ -849,22 +849,32 @@ const Plans = () => {
                     console.log('[createPatientTreatment] result', result);
 
                     if (result.success && (result.status === 200 || result.status === 201)) {
-                      message.success('Əməliyyatlar uğurla təsdiqləndi!');
+                      // Həmçinin bu plan elementlərini save et ki, hesabatda görünsün
+                      const saveResult = await savePatientTreatmentFromStore({ checkedPlanIds: uniquePatientPlanIds });
+                      console.log('[savePatientTreatment] result', saveResult);
 
-                      // Report avtomatik yenilənməsi üçün refresh token yaz
-                      try {
-                        const refreshKey = `patientReportRefresh-${patientId}`;
-                        const ts = String(Date.now());
-                        console.log('[report-refresh]', { refreshKey, ts });
-                        localStorage.setItem(refreshKey, ts);
-                      } catch (e) {
-                        // localStorage block olsa belə, əsas axını qırmayaq
+                      if (saveResult.success && (saveResult.status === 200 || saveResult.status === 201)) {
+                        message.success('Əməliyyatlar uğurla təsdiqləndi!');
+
+                        // Report avtomatik yenilənməsi üçün refresh token yaz
+                        try {
+                          const refreshKey = `patientReportRefresh-${patientId}`;
+                          const ts = String(Date.now());
+                          console.log('[report-refresh]', { refreshKey, ts });
+                          localStorage.setItem(refreshKey, ts);
+                        } catch (e) {
+                          // localStorage block olsa belə, əsas axını qırmayaq
+                        }
+
+                        // Hesabat səhifəsinə avtomatik keç
+                        try {
+                          navigate(`/patients/patient/${patientId}/report`);
+                        } catch (_) {}
+                      } else {
+                        const saveStatus = saveResult.status || saveResult.error?.response?.status;
+                        const saveErrorMessage = saveResult.error?.response?.data?.message || 'Əməliyyatlar icra edilərkən xəta baş verdi';
+                        message.error(`İcra Xətası (Status: ${saveStatus}): ${saveErrorMessage}`);
                       }
-
-                      // Hesabat səhifəsinə avtomatik keç
-                      try {
-                        navigate(`/patients/patient/${patientId}/report`);
-                      } catch (_) {}
 
                       // Patient plans datayı yenilə
                       setLoadingPatientPlans(true);
